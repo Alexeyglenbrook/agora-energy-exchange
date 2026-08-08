@@ -1,0 +1,1650 @@
+<meta charset="UTF-8">
+<title>Агора — прототип електронної торгової системи енергетичної біржі</title>
+<svg style="display:none">
+<defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M3.5 8h13M13 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 16h-13M11 20l-4-4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v7M20 20v-4M3 20h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.7" y="5.3" width="16.6" height="14.7" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.7 9.6h16.6M8 3.3v3.6M16 3.3v3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.3 19.2c0-3.4 2.6-5.3 5.7-5.3s5.7 1.9 5.7 5.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="17" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14.8 13.4c2.6.3 4.6 2 4.6 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h8l4 4V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.5 3.5V8h4M8.5 12.2h7M8.5 15.6h7M8.5 18.9h4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M20.5 20.5 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0c0 4.6 1.6 5.6 2 6H4c.4-.4 2-1.4 2-6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2.3M12 19.2v2.3M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-min" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-max" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="i-restore" viewBox="0 0 24 24"><rect x="8" y="4.5" width="10.5" height="10.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 8.5V19h10.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 21 19.5H3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9.5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.3V12l3.4 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M6 17 17 6M9 6h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M6 7 17 18M9 18h8v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5.5h16l-6 7.4V19l-4 2v-8.1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c-1.2 3.1-4.6 4.9-4.6 9.2A4.6 4.6 0 0 0 12 16.3a4.6 4.6 0 0 0 4.6-4.6c0-1.8-.9-2.7-1.6-3.5.3 1.4-.5 2.4-1.3 2.4-1 0-1.3-1-.9-2 .5-1.3.2-2.9-.8-4.1Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6.2 7.4 6.2 11.4a6.2 6.2 0 1 1-12.4 0C5.8 10.4 12 3 12 3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 8 12 3.7 20.5 8v8L12 20.3 3.5 16Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3.5 8 12 12.3 20.5 8M12 12.3v8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M12 3c5.2 2 7.3 6.2 7.3 10.2A7.3 7.3 0 0 1 12 20.5a7.3 7.3 0 0 1-7.3-7.3C4.7 9.2 6.8 5 12 3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 20.5V9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19.5 6.5V11c0 5-3 8.3-7.5 9.5C7.5 19.3 4.5 16 4.5 11V6.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 11.8l2.1 2.1L15.5 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-gavel" viewBox="0 0 24 24"><path d="m9.5 6.5 5 5M5 14l4.5-4.5 3 3L8 17H5v-3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 3.5 20.5 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.5 20.5h9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</defs>
+</svg>
+
+<div class="desktop">
+
+  <p class="desktop-note">Прототип десктопного застосунку в стилі Windows 11 (Mica/Acrylic, NavigationView) для групи торгових систем енергетичної біржі. <strong>Правило 1 (ліміти):</strong> на платформі «Електрична енергія» обсяг заявки на купівлю/продаж не може перевищувати вільний ліміт учасника на добу постачання — спробуйте на вкладці «Торги» виставити заявку з обсягом, що перевищує залишок ліміту вашої компанії. Заявки, що перетинають найкращу зустрічну ціну, виконуються одразу. <strong>Правило 2 (ролі та доступ):</strong> рішення про акредитацію учасників ухвалює лише персонал біржі, а не трейдери — перемкніть робоче місце «Трейдер» / «Акредитація» перемикачем у бічній панелі і порівняйте, що видно і що дозволено в кожній ролі.</p>
+
+  <div class="hub" id="hubScreen">
+    <div class="hub-intro"><p><strong>Торгові системи Агора</strong> надають учасникам ринку доступ до торгівлі енергоресурсами, природним газом, електричною енергією та лісовою продукцією, а також до сервісів звітності REMIT-типу та електронних майданчиків спецторгів. Для початку роботи оберіть потрібну платформу зі списку нижче.</p></div>
+    <div class="hub-grid" id="hubGrid"></div>
+  </div>
+
+  <div class="win11-window" id="win11Window" style="display:none">
+
+    <div class="titlebar">
+      <div class="tb-drag">
+        <span class="tb-icon"><svg class="ic"><use href="#i-bolt"/></svg></span>
+        <span class="tb-title" id="tbTitle">Агора — торги. котирування. прозорість ринку</span>
+      </div>
+      <div class="tb-caption">
+        <button class="cap-btn" onclick="toast('У прототипі вікно не згортається')" aria-label="Згорнути вікно"><svg class="ic tiny"><use href="#i-min"/></svg></button>
+        <button class="cap-btn" onclick="toggleMaximize()" aria-label="Розгорнути вікно"><svg class="ic tiny" id="maxIcon"><use href="#i-max"/></svg></button>
+        <button class="cap-btn cap-close" onclick="toast('У прототипі вікно не закривається')" aria-label="Закрити вікно"><svg class="ic tiny"><use href="#i-close"/></svg></button>
+      </div>
+    </div>
+
+    <div class="app-body">
+      <nav class="nav-pane" id="navPane">
+        <div class="nav-platform">
+          <button class="nav-back" onclick="exitToHub()"><svg class="ic sm"><use href="#i-back"/></svg>Платформи</button>
+          <div class="nav-platform-name" id="navPlatformName">—</div>
+        </div>
+        <div class="nav-role">
+          <span class="field-lbl role-lbl">Робоче місце</span>
+          <div class="role-toggle">
+            <button class="role-btn active" id="roleTraderBtn" onclick="setRole('trader')">Трейдер</button>
+            <button class="role-btn" id="roleStaffBtn" onclick="setRole('staff')">Акредитація</button>
+          </div>
+        </div>
+        <div class="nav-search-wrap">
+          <div class="nav-search"><svg class="ic tiny"><use href="#i-search"/></svg><input id="navSearchInput" placeholder="Пошук учасника, ЄДРПОУ…" autocomplete="off" oninput="renderGlobalSearch()" onfocus="renderGlobalSearch()"></div>
+          <div class="nav-search-results" id="navSearchResults"></div>
+        </div>
+        <div class="nav-list">
+          <button class="nav-item active" data-sec="dashboard" onclick="showSection('dashboard')"><svg class="ic"><use href="#i-grid"/></svg><span>Огляд</span></button>
+          <button class="nav-item" data-sec="trading" onclick="showSection('trading')"><svg class="ic"><use href="#i-swap"/></svg><span>Торги</span></button>
+          <button class="nav-item" data-sec="quotes" onclick="showSection('quotes')"><svg class="ic"><use href="#i-chart"/></svg><span>Котирування</span></button>
+          <button class="nav-item" data-sec="calendar" onclick="showSection('calendar')"><svg class="ic"><use href="#i-calendar"/></svg><span>Календар торгів</span></button>
+          <button class="nav-item" data-sec="remit" onclick="showSection('remit')"><svg class="ic"><use href="#i-shield"/></svg><span>Звіти (REMIT)</span></button>
+          <button class="nav-item" data-sec="lots" onclick="showSection('lots')"><svg class="ic"><use href="#i-gavel"/></svg><span>Лоти</span></button>
+          <button class="nav-item" data-sec="participants" onclick="showSection('participants')"><svg class="ic"><use href="#i-users"/></svg><span>Учасники</span></button>
+          <button class="nav-item" data-sec="reports" onclick="showSection('reports')"><svg class="ic"><use href="#i-doc"/></svg><span>Аналітика</span></button>
+        </div>
+        <div class="nav-sep"></div>
+        <div class="nav-list nav-list-foot">
+          <button class="nav-item" onclick="toggleTheme()"><svg class="ic" id="themeIcon"><use href="#i-moon"/></svg><span id="themeLabel">Темна тема</span></button>
+        </div>
+        <div class="nav-user">
+          <span class="avatar" id="navAvatar">ОГ</span>
+          <div class="nav-user-txt"><span id="navUserName">Олексій Гленбрук</span><span class="micro" id="navUserSub">Трейдер, ТОВ «Дніпро Пауер Трейд»</span></div>
+          <div class="notif-wrap">
+            <button class="icon-btn" onclick="toggleNotif(event)" aria-label="Сповіщення"><svg class="ic"><use href="#i-bell"/></svg><span class="notif-dot" id="notifDot"></span></button>
+            <div class="notif-panel" id="notifPanel">
+              <div class="notif-panel-head">Сповіщення</div>
+              <div class="notif-list" id="notifList"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="content" id="content">
+
+        <!-- ОГЛЯД -->
+        <section class="csec active" data-sec="dashboard">
+          <div class="page-head">
+            <div><h1>Огляд ринку</h1><p class="page-sub" id="dashDate">—</p></div>
+          </div>
+
+          <div class="kpi-grid" id="dashKpi"></div>
+
+          <div class="dash-cols">
+            <div class="card" id="dashCardLeft"></div>
+            <div class="card" id="dashCardRight"></div>
+          </div>
+
+          <div class="dash-cols">
+            <div class="card">
+              <div class="section-head"><h2 id="dashSessionsTitle">Найближчі торгові сесії</h2><span class="link" id="dashSessionsLink">календар →</span></div>
+              <div id="dashSessions"></div>
+            </div>
+            <div class="card">
+              <div class="section-head"><h2 id="dashPendingTitle">Заявки на акредитацію</h2><span class="link" id="dashPendingLink">учасники →</span></div>
+              <div id="dashPending"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ТОРГИ -->
+        <section class="csec" data-sec="trading">
+          <div class="page-head">
+            <div><h1 id="tradingTitle">Торги</h1><p class="page-sub" id="tradingSub">оберіть інструмент, щоб побачити стакан заявок</p></div>
+            <div class="gate-mini"><svg class="ic sm"><use href="#i-clock"/></svg><span>Закриття прийому заявок через <strong class="mono" id="gateCountdownMini">—</strong></span></div>
+          </div>
+
+          <div class="hour-strip" id="hourStrip"></div>
+
+          <div class="trade-grid">
+            <div class="card ob-card">
+              <div class="section-head"><h2>Стакан заявок — <span id="obHourLabel">—</span></h2><span class="pill pill-info" id="obClearing">—</span></div>
+              <div class="ob-cols">
+                <div class="ob-col">
+                  <div class="ob-col-head ob-buy">Купівля (bid)</div>
+                  <div class="ob-table" id="obBids"></div>
+                </div>
+                <div class="ob-col">
+                  <div class="ob-col-head ob-sell">Продаж (ask)</div>
+                  <div class="ob-table" id="obAsks"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-head"><h3>Виставити заявку</h3></div>
+              <div class="limit-box">
+                <span class="field-lbl">Вільний ліміт «Дніпро Пауер Трейд»</span>
+                <div class="limit-track"><div class="limit-fill" id="limitFill"></div></div>
+                <span class="micro" id="limitText">—</span>
+              </div>
+              <div class="side-toggle">
+                <button class="side-btn side-buy active" id="sideBuyBtn" onclick="setOrderSide('buy')">Купити</button>
+                <button class="side-btn side-sell" id="sideSellBtn" onclick="setOrderSide('sell')">Продати</button>
+              </div>
+              <label class="field">
+                <span class="field-lbl" id="fOrderPriceLbl">Ціна</span>
+                <input class="input mono" id="fOrderPrice" type="number" step="0.01" placeholder="Наприклад, 5250.00">
+              </label>
+              <label class="field" id="fOrderVolField">
+                <span class="field-lbl required" id="fOrderVolLbl">Обсяг</span>
+                <input class="input mono" id="fOrderVolume" type="number" step="1" placeholder="Наприклад, 50" oninput="clearOrderVolError()">
+                <span class="field-error" id="fOrderVolError">Обсяг перевищує вільний ліміт учасника — зменшіть обсяг або скасуйте активну заявку.</span>
+                <span class="field-help" id="fOrderVolHelp">Не може перевищувати вільний ліміт, показаний вище.</span>
+              </label>
+              <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="submitOrder()"><svg class="ic sm"><use href="#i-plus"/></svg>Виставити заявку</button>
+              <div class="section-head sub"><h3>Мої заявки</h3></div>
+              <div id="myOrdersList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- КОТИРУВАННЯ -->
+        <section class="csec" data-sec="quotes">
+          <div class="page-head">
+            <div><h1>Біржові котирування</h1><p class="page-sub">Результати торгів за напрямками — ціна та обсяг по датах</p></div>
+          </div>
+          <div class="chip-row" id="quoteCats"></div>
+          <div id="quoteInstruments"></div>
+        </section>
+
+        <!-- КАЛЕНДАР -->
+        <section class="csec" data-sec="calendar">
+          <div class="page-head">
+            <div><h1>Календар торгів</h1><p class="page-sub">РДН торгується щодня; аукціони з диференціалами — за окремим розкладом</p></div>
+          </div>
+          <div class="card">
+            <div class="section-head"><h2 id="calMonthLabel">—</h2></div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div class="card" id="calSessionCard" style="display:none">
+            <div class="section-head"><h3 id="calSelDate">—</h3></div>
+            <div id="calSessionList"></div>
+          </div>
+        </section>
+
+        <!-- УЧАСНИКИ -->
+        <section class="csec" data-sec="participants">
+          <div class="page-head">
+            <div><h1>Учасники ринку</h1><p class="page-sub">Реєстр акредитованих компаній, заявок на акредитацію та лімітів</p></div>
+          </div>
+          <div class="chip-row" id="partFilters"></div>
+          <div class="master-detail">
+            <div class="list-panel">
+              <div class="list-panel-search"><svg class="ic tiny"><use href="#i-search"/></svg><input id="partSearch" placeholder="Назва компанії або ЄДРПОУ…" oninput="renderParticipantList()"></div>
+              <div class="list-items" id="partListItems"></div>
+            </div>
+            <div class="detail-panel" id="partDetail"></div>
+          </div>
+        </section>
+
+        <!-- АНАЛІТИКА -->
+        <section class="csec" data-sec="reports">
+          <div class="page-head">
+            <div><h1>Аналітика ринку</h1><p class="page-sub">Обороти учасників та структура ринку за сегментами</p></div>
+          </div>
+          <div class="dash-cols">
+            <div class="card">
+              <div class="section-head"><h2>Топ-5 учасників за обсягом заявок</h2></div>
+              <div id="repTop5"></div>
+            </div>
+            <div class="card">
+              <div class="section-head"><h2>Частка сегментів у торговому обороті</h2></div>
+              <div id="repSegments"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-head"><h2>Динаміка обсягів торгів РДН, тис. МВт·г/міс.</h2></div>
+            <div class="dayline-wrap"><svg viewBox="0 0 600 110" class="dayline" id="repTrendSvg" preserveAspectRatio="none"></svg></div>
+          </div>
+        </section>
+
+        <!-- ЗВІТИ REMIT -->
+        <section class="csec" data-sec="remit">
+          <div class="page-head">
+            <div><h1>Звітність REMIT</h1><p class="page-sub">Передача даних про укладені контракти та фундаментальні дані відповідно до вимог регулятора</p></div>
+          </div>
+          <div class="kpi-grid" id="remitKpi"></div>
+          <div class="card table-card">
+            <table class="fluent-table"><thead><tr><th>Звіт</th><th>Період</th><th>Термін подання</th><th>Статус</th><th></th></tr></thead><tbody id="remitRows"></tbody></table>
+          </div>
+        </section>
+
+        <!-- ЛОТИ -->
+        <section class="csec" data-sec="lots">
+          <div class="page-head">
+            <div><h1>Біржові операції — лоти</h1><p class="page-sub">Спеціальний режим продажу активів: аукціони на підвищення ставки</p></div>
+          </div>
+          <div id="lotsGrid" class="lots-grid"></div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalRoot"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- constants ----------
+const TODAY = new Date(2026,7,8,10,0,0); // 8 серпня 2026
+const DELIVERY = new Date(2026,7,9);
+const DATES = ['24.07','27.07','28.07','29.07','30.07','31.07','01.08','04.08','05.08','06.08','07.08'];
+const MY_COMPANY_ID = 'p2';
+
+// ---------- platforms (hub) ----------
+const PLATFORMS = [
+  { id:'aets', code:'АЕТС', title:'Біржова електронна торгова система', subtitle:'', badge:'Енергоресурси', icon:'i-box',
+    desc:'Біржова торгівля нафтопродуктами та вугільною продукцією на організованому ринку з використанням сучасних торгових інструментів.',
+    categories:['oil','coal'], hasTrading:true, special:null },
+  { id:'power', code:'АЕТС', title:'Аукціони електроенергії', subtitle:'Electric Power', badge:'Електрична енергія', icon:'i-bolt',
+    desc:'Торги на добу наперед (РДН) та аукціони з купівлі-продажу електричної енергії за двосторонніми договорами.',
+    categories:['electricity'], hasTrading:true, special:null },
+  { id:'gas', code:'СТП', title:'Природний газ', subtitle:'', badge:'Стандартизовані продукти', icon:'i-flame',
+    desc:'Біржова торгівля стандартизованими продуктами газового ринку відповідно до вимог ринку.',
+    categories:['gas'], hasTrading:true, special:null },
+  { id:'wood', code:'', title:'Необроблена деревина', subtitle:'', badge:'Лісові торги', icon:'i-leaf',
+    desc:'Біржові торги необробленою деревиною та пиломатеріалами.',
+    categories:['wood'], hasTrading:true, special:null },
+  { id:'remit', code:'ЗРД', title:'Система АПД', subtitle:'', badge:'REMIT-звітність', icon:'i-shield',
+    desc:'Послуги з передачі даних REMIT — звітність учасників оптового енергетичного ринку відповідно до вимог регулятора.',
+    categories:[], hasTrading:false, special:'reports' },
+  { id:'lots', code:'', title:'Біржові операції', subtitle:'спецрежим продажу активів', badge:'Спецторги', icon:'i-gavel',
+    desc:'Організація та проведення біржових торгів, укладення та супровід договорів у спеціальному режимі продажу активів.',
+    categories:[], hasTrading:false, special:'lots' },
+];
+let currentPlatform = null;
+
+// ---------- role (access control) ----------
+let currentRole = 'trader'; // 'trader' | 'staff'
+const ROLE_INFO = {
+  trader: { label:'Трейдер', person:'Олексій Гленбрук', sub:'Трейдер, ТОВ «Дніпро Пауер Трейд»', avatar:'ОГ' },
+  staff:  { label:'Акредитація', person:'Марина Дорошенко', sub:'Спеціаліст відділу акредитації УЕБ', avatar:'МД' },
+};
+function setRole(role){
+  if(currentRole===role) return;
+  currentRole = role;
+  document.getElementById('roleTraderBtn').classList.toggle('active', role==='trader');
+  document.getElementById('roleStaffBtn').classList.toggle('active', role==='staff');
+  const info = ROLE_INFO[role];
+  document.getElementById('navAvatar').textContent = info.avatar;
+  document.getElementById('navUserName').textContent = info.person;
+  document.getElementById('navUserSub').textContent = info.sub;
+  selectedPartId = null;
+  if(activePartFilter==='pending' && role==='trader') activePartFilter = 'all';
+  if(currentPlatform){
+    applyPlatformNav();
+    const activeBtn = document.querySelector('.nav-item.active[data-sec]');
+    const curSec = activeBtn ? activeBtn.dataset.sec : 'dashboard';
+    const stillVisible = document.querySelector(`.nav-item[data-sec="${curSec}"]`)?.style.display !== 'none';
+    showSection(stillVisible ? curSec : 'dashboard');
+  }
+  toast('Робоче місце змінено: ' + info.label);
+}
+
+function renderHub(){
+  document.getElementById('hubGrid').innerHTML = PLATFORMS.map(p=>`
+    <div class="hub-card" onclick="enterPlatform('${p.id}')" tabindex="0" role="button" onkeydown="onEnter(event,()=>enterPlatform('${p.id}'))">
+      <div class="hub-card-top">
+        <span class="hub-code"><svg class="ic sm"><use href="#${p.icon}"/></svg>${p.code || p.title}</span>
+        <span class="pill pill-info">${p.badge}</span>
+      </div>
+      ${p.subtitle ? `<span class="hub-eng">${p.subtitle.toUpperCase()}</span>` : ''}
+      ${p.code ? `<h3 class="hub-title">${p.title}</h3>` : ''}
+      <p class="hub-desc">${p.desc}</p>
+      <span class="hub-arrow"><svg class="ic sm"><use href="#i-arrow"/></svg></span>
+    </div>`).join('');
+}
+function enterPlatform(id){
+  currentPlatform = PLATFORMS.find(p=>p.id===id);
+  if(currentPlatform.categories.length) activeCat = currentPlatform.categories[0];
+  selectedMarket = null;
+  document.getElementById('hubScreen').style.display = 'none';
+  document.getElementById('win11Window').style.display = 'flex';
+  const label = currentPlatform.code ? currentPlatform.code+' · '+currentPlatform.title : currentPlatform.title;
+  document.getElementById('tbTitle').textContent = 'Агора — ' + label;
+  document.getElementById('navPlatformName').textContent = label;
+  applyPlatformNav();
+  renderParticipantList();
+  if(!currentPlatform.special) renderReports();
+  const def = currentRole==='staff' ? 'dashboard' : (currentPlatform.special==='reports' ? 'remit' : currentPlatform.special==='lots' ? 'lots' : 'dashboard');
+  showSection(def);
+}
+function exitToHub(){
+  document.getElementById('win11Window').style.display = 'none';
+  document.getElementById('hubScreen').style.display = '';
+  closeNotif();
+}
+function applyPlatformNav(){
+  const p = currentPlatform;
+  const isTrader = currentRole==='trader';
+  const isStaff = currentRole==='staff';
+  const visible = {
+    dashboard: true,
+    trading: isTrader && !!p.hasTrading,
+    quotes: isTrader && p.categories.length>0,
+    calendar: isTrader && !!p.hasTrading,
+    remit: isTrader && p.special==='reports',
+    lots: isTrader && p.special==='lots',
+    participants: true,
+    reports: isStaff && !p.special,
+  };
+  Object.keys(visible).forEach(sec=>{
+    document.querySelectorAll(`.nav-item[data-sec="${sec}"]`).forEach(el=> el.style.display = visible[sec] ? '' : 'none');
+  });
+}
+
+// ---------- quotations data ----------
+const CATEGORIES = [
+  { id:'electricity', label:"Електрична енергія", icon:'i-bolt', unit:'грн/МВт·г', volUnit:'тис. МВт·г', instruments:[
+    { id:'base', name:"Базове навантаження — ОЕС України", prices:[5120,5180,5240,5090,5310,5260,5390,5350,5410,5380,5430], vols:[14.2,13.8,15.1,14.6,15.8,15.2,16.0,15.5,16.3,15.9,16.1] },
+    { id:'day', name:"Блок 07:00–23:00 (денний)", prices:[5800,5850,5920,5780,6010,5950,6080,6040,6110,6070,6120], vols:[9.1,8.9,9.4,9.0,9.6,9.3,9.8,9.5,9.9,9.7,9.8] },
+    { id:'night', name:"Блок 23:00–07:00 (нічний)", prices:[3150,3180,3220,3100,3260,3230,3300,3270,3310,3290,3320], vols:[5.0,4.9,5.2,5.0,5.3,5.1,5.4,5.2,5.5,5.3,5.4] },
+  ]},
+  { id:'gas', label:"Природний газ", icon:'i-flame', unit:'грн/тис. м³', volUnit:'тис. м³', instruments:[
+    { id:'prepay', name:"Ресурс наступного місяця — передоплата", prices:[20200,20350,20500,20400,20650,20600,20800,20750,20900,20870,20950], vols:[120,115,130,125,140,135,150,145,155,150,158] },
+    { id:'postpay', name:"Ресурс наступного місяця — післяплата", prices:[20450,20600,20750,20650,20900,20850,21050,21000,21150,21120,21200], vols:[118,112,128,122,138,132,148,142,152,148,155] },
+  ]},
+  { id:'oil', label:"Нафтопродукти", icon:'i-drop', unit:'грн/т', volUnit:'т', instruments:[
+    { id:'a95', name:"Бензин А-95 — EXW, автотранспорт", prices:[33500,33700,33900,33600,34100,34000,34300,34200,34450,34380,34500], vols:[80,78,85,82,88,86,90,89,92,90,93] },
+    { id:'diesel', name:"Дизельне паливо — EXW, автотранспорт", prices:[31200,31400,31550,31350,31700,31650,31900,31820,32000,31980,32100], vols:[140,138,145,142,150,148,152,151,155,153,156] },
+    { id:'m100', name:"Мазут М-100 — EXW, автотранспорт", prices:[15400,15300,15550,15450,15700,15600,15850,15780,15950,15900,16000], vols:[60,58,64,61,66,64,68,66,70,68,71] },
+  ]},
+  { id:'coal', label:"Вугільна продукція", icon:'i-box', unit:'грн/т', volUnit:'т', instruments:[
+    { id:'coal1', name:"Вугілля кам'яне — DAP, залізниця", prices:[4200,4230,4270,4210,4300,4280,4340,4320,4370,4350,4390], vols:[220,215,230,222,238,232,244,240,250,246,252] },
+  ]},
+  { id:'wood', label:"Деревина", icon:'i-leaf', unit:'грн/м³', volUnit:'м³', instruments:[
+    { id:'wood1', name:"Дрова паливні — EXW, автотранспорт", prices:[1450,1470,1490,1460,1510,1500,1530,1520,1550,1540,1560], vols:[340,335,350,342,358,352,366,362,372,368,376] },
+  ]},
+];
+let activeCat = 'electricity';
+
+// ---------- participants ----------
+const participants = [
+  { id:'p1', name:"АТ «Південенерго»", edrpou:"14360570", segment:"Виробник", status:"accredited", limit:12000, used:8200, contracts:34, since:"2019-03-12", contact:"Марина Кулик", phone:"+380 44 200 11 22", city:"Одеса" },
+  { id:'p2', name:"ТОВ «Дніпро Пауер Трейд»", edrpou:"41028733", segment:"Трейдер", status:"accredited", limit:5000, used:3100, contracts:18, since:"2021-06-01", contact:"Ігор Северин", phone:"+380 67 311 45 09", city:"Дніпро" },
+  { id:'p3', name:"ПрАТ «Карпати Енергозбут»", edrpou:"23576612", segment:"Постачальник", status:"accredited", limit:8000, used:5400, contracts:27, since:"2018-11-20", contact:"Олена Тарасюк", phone:"+380 50 220 33 44", city:"Львів" },
+  { id:'p4', name:"ТОВ «МеталПром Енерго»", edrpou:"38214470", segment:"Споживач", status:"accredited", limit:3000, used:2600, contracts:9, since:"2022-02-14", contact:"Роман Бойко", phone:"+380 63 900 12 34", city:"Запоріжжя" },
+  { id:'p5', name:"ТОВ «Вітропарк Поділля»", edrpou:"44120983", segment:"Виробник", status:"accredited", limit:4200, used:1900, contracts:12, since:"2023-05-09", contact:"Наталя Гриценко", phone:"+380 68 777 21 09", city:"Вінниця" },
+  { id:'p6', name:"ТОВ «Сонячна Генерація Плюс»", edrpou:"45509912", segment:"Виробник", status:"pending", limit:2500, used:0, contracts:0, since:"2026-07-28", contact:"Дмитро Оліфіренко", phone:"+380 97 456 78 90", city:"Хмельницький" },
+  { id:'p7', name:"АТ «Енергозбут Полтавщини»", edrpou:"03340561", segment:"Постачальник", status:"accredited", limit:6000, used:4300, contracts:21, since:"2017-09-01", contact:"Світлана Мельник", phone:"+380 50 111 22 33", city:"Полтава" },
+  { id:'p8', name:"ТОВ «Хімпром Черкаси»", edrpou:"31220456", segment:"Споживач", status:"accredited", limit:2200, used:1500, contracts:6, since:"2020-04-18", contact:"Юрій Ковальов", phone:"+380 63 222 44 55", city:"Черкаси" },
+  { id:'p9', name:"ТОВ «Трейд Енерго Груп»", edrpou:"36601278", segment:"Трейдер", status:"suspended", limit:3500, used:0, contracts:14, since:"2019-12-05", contact:"Артем Пилипенко", phone:"+380 67 888 99 00", city:"Київ" },
+  { id:'p10', name:"ПАТ «Прикарпаттяенерго»", edrpou:"02059991", segment:"Постачальник", status:"accredited", limit:5400, used:3800, contracts:19, since:"2016-02-22", contact:"Ірина Ференц", phone:"+380 34 220 15 60", city:"Івано-Франківськ" },
+  { id:'p11', name:"ТОВ «Металургійний Комбінат Схід»", edrpou:"24501187", segment:"Споживач", status:"accredited", limit:7000, used:6300, contracts:11, since:"2015-07-30", contact:"Віктор Дорошенко", phone:"+380 57 300 40 50", city:"Харків" },
+  { id:'p12', name:"ТОВ «БіоЕнерго Суми»", edrpou:"45877102", segment:"Виробник", status:"pending", limit:1800, used:0, contracts:0, since:"2026-08-01", contact:"Катерина Лисенко", phone:"+380 54 200 30 10", city:"Суми" },
+  { id:'p13', name:"ТОВ «Ровенська Трейдингова Компанія»", edrpou:"39215540", segment:"Трейдер", status:"accredited", limit:4000, used:2100, contracts:15, since:"2021-01-11", contact:"Максим Ткач", phone:"+380 36 244 55 66", city:"Рівне" },
+  { id:'p14', name:"ТОВ «Енергоресурс Житомир»", edrpou:"33409215", segment:"Постачальник", status:"accredited", limit:3300, used:1200, contracts:8, since:"2019-08-08", contact:"Оксана Гнатюк", phone:"+380 41 220 90 10", city:"Житомир" },
+];
+let activePartFilter = 'all';
+let selectedPartId = null;
+
+// ---------- trading floor ----------
+const HOURLY_BASE = [3200,3100,3050,3000,3050,3300,4200,5200,5600,5100,4700,4300,4000,3900,4100,4500,5300,6200,6400,6000,5400,4800,4100,3500];
+let selectedMarket = null;
+let orderBooks = {}; // marketKey -> {bids:[], asks:[]}
+let myOrders = [];
+let orderSide = 'buy';
+let orderSeq = 1;
+
+function marketsForPlatform(p){
+  if(p.id==='power'){
+    return HOURLY_BASE.map((base,i)=>({ key:'h'+i, label: String(i).padStart(2,'0')+'–'+String((i+1)%24).padStart(2,'0'), base, unit:'грн/МВт·г', volUnit:'МВт·г' }));
+  }
+  const list = [];
+  CATEGORIES.filter(c=>p.categories.includes(c.id)).forEach(cat=>{
+    const shorts = cat.instruments.map(inst=>inst.name.split(' — ')[0]);
+    cat.instruments.forEach((inst,idx)=>{
+      let label = shorts[idx];
+      if(shorts.filter(s=>s===label).length>1){
+        const rest = inst.name.split(' — ')[1];
+        if(rest) label += ' (' + rest + ')';
+      }
+      list.push({ key:inst.id, label, base:inst.prices[inst.prices.length-1], unit:cat.unit, volUnit:cat.volUnit });
+    });
+  });
+  return list;
+}
+function currentMarket(){
+  const markets = marketsForPlatform(currentPlatform);
+  return markets.find(m=>m.key===selectedMarket) || markets[0];
+}
+function genBook(marketKey){
+  const m = marketsForPlatform(currentPlatform).find(x=>x.key===marketKey);
+  const base = m.base;
+  const bids = [], asks = [];
+  for(let i=0;i<5;i++){
+    bids.push({ id:'seed', price: base - (i+1)*base*0.008, volume: 120 - i*15 });
+    asks.push({ id:'seed', price: base + i*base*0.007 + base*0.002, volume: 110 - i*12 });
+  }
+  return { bids, asks };
+}
+function getBook(marketKey){
+  if(!orderBooks[marketKey]) orderBooks[marketKey] = genBook(marketKey);
+  return orderBooks[marketKey];
+}
+function usedLimitFor(pId){
+  const p = participants.find(x=>x.id===pId);
+  const active = myOrders.filter(o=>o.status==='active'||o.status==='matched').reduce((s,o)=>s+o.volume,0);
+  return p.used + active;
+}
+function freeLimitFor(pId){
+  const p = participants.find(x=>x.id===pId);
+  return Math.max(0, p.limit - usedLimitFor(pId));
+}
+
+// ---------- helpers ----------
+function fmtNum(n, d=0){ return n.toLocaleString('uk-UA',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function fmtMoney(n){ return fmtNum(n,2); }
+function pct(a,b){ return ((a-b)/b*100); }
+function pctStr(a,b){ const v = pct(a,b); return (v>=0?'+':'')+v.toFixed(2)+'%'; }
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+function buildSparkline(values, w=300, h=90, pad=8){
+  const min = Math.min(...values), max = Math.max(...values);
+  const span = (max-min)||1;
+  const stepX = (w - pad*2) / (values.length-1);
+  const pts = values.map((v,i)=>{
+    const x = pad + i*stepX;
+    const y = h - pad - ((v-min)/span)*(h-pad*2);
+    return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  return pts;
+}
+function onEnter(e,fn){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(); } }
+
+// ---------- section switching ----------
+function showSection(name){
+  if(!currentPlatform) return;
+  document.querySelectorAll('.nav-item[data-sec]').forEach(b=>b.classList.toggle('active', b.dataset.sec===name));
+  document.querySelectorAll('.csec').forEach(s=>s.classList.toggle('active', s.dataset.sec===name));
+  closeNotif();
+  if(name==='dashboard') renderDashboard();
+  if(name==='trading') renderTrading();
+  if(name==='quotes') renderQuotes();
+  if(name==='calendar') renderCalendar();
+  if(name==='participants') renderParticipantList();
+  if(name==='reports') renderReports();
+  if(name==='remit') renderRemit();
+  if(name==='lots') renderLots();
+  document.getElementById('content').scrollTop = 0;
+}
+
+// ---------- dashboard ----------
+function renderDashboard(){
+  if(!currentPlatform) return;
+  document.getElementById('dashDate').textContent = TODAY.toLocaleDateString('uk-UA',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  if(currentRole==='staff'){ renderStaffDashboard(); return; }
+
+  function kpi(label, val, unit, gap, onClick){
+    const up = gap.startsWith('+');
+    return `<div class="card kpi" tabindex="0" role="button" onclick="${onClick}" onkeydown="onEnter(event,()=>{${onClick}})">
+      <span class="kpi-lbl">${label}</span>
+      <span class="kpi-num">${fmtMoney(val)}<span class="kpi-unit">${unit}</span></span>
+      <span class="pill ${up?'pill-success':'pill-critical'}"><svg class="ic tiny"><use href="#${up?'i-up':'i-down'}"/></svg>${gap}</span>
+    </div>`;
+  }
+
+  if(currentPlatform.id==='power'){
+    const elec = CATEGORIES.find(c=>c.id==='electricity').instruments;
+    const base = elec[0].prices, day = elec[1].prices, night = elec[2].prices;
+    const gas = CATEGORIES.find(c=>c.id==='gas').instruments[0].prices;
+    const baseLast = base[base.length-1], baseGap = pctStr(baseLast, base[base.length-2]);
+    const dayLast = day[day.length-1], dayGap = pctStr(dayLast, day[day.length-2]);
+    const nightLast = night[night.length-1], nightGap = pctStr(nightLast, night[night.length-2]);
+    const gasLast = gas[gas.length-1], gasGap = pctStr(gasLast, gas[gas.length-2]);
+    document.getElementById('dashKpi').innerHTML =
+      kpi('Базове навантаження — ОЕС', baseLast, 'грн/МВт·г', baseGap, "showSection('quotes')") +
+      kpi('Блок 07:00–23:00', dayLast, 'грн/МВт·г', dayGap, "showSection('quotes')") +
+      kpi('Блок 23:00–07:00', nightLast, 'грн/МВт·г', nightGap, "showSection('quotes')") +
+      kpi('Природний газ, ресурс міс.', gasLast, 'грн/тис.м³', gasGap, "showSection('quotes')");
+
+    const dayPts = buildSparkline(HOURLY_BASE, 300, 70, 6);
+    document.getElementById('dashCardLeft').innerHTML = `
+      <div class="section-head"><h2><svg class="ic sm"><use href="#i-swap"/></svg> Найближча сесія РДН</h2><span class="link" onclick="showSection('trading')">до торгів →</span></div>
+      <div class="gate-box">
+        <div><span class="gate-lbl">Гейт-закриття заявок на добу постачання</span><span class="gate-date">на добу постачання ${DELIVERY.toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit',year:'numeric'})}</span></div>
+        <div class="gate-count mono" id="gateCountdown">—:—:—</div>
+      </div>
+      <div class="dayline-wrap"><svg viewBox="0 0 300 70" class="dayline"><polyline points="${dayPts}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <p class="hint-text">Індикативна крива ціни за годинами постачання на завтра, грн/МВт·г</p>`;
+
+    const trades = [
+      {time:'09:58', hour:'07–08', side:'buy', price:5210, volume:40},
+      {time:'10:12', hour:'08–09', side:'sell', price:5580, volume:65},
+      {time:'10:27', hour:'17–18', side:'buy', price:6180, volume:30},
+      {time:'10:41', hour:'02–03', side:'sell', price:3070, volume:80},
+      {time:'10:53', hour:'18–19', side:'buy', price:6250, volume:25},
+      {time:'11:05', hour:'12–13', side:'sell', price:4050, volume:50},
+    ];
+    document.getElementById('dashCardRight').innerHTML = `
+      <div class="section-head"><h2>Останні виконані угоди</h2><span class="link" onclick="showSection('trading')">стакан заявок →</span></div>
+      <div>${trades.map(t=>`
+        <div class="row-item" onclick="showSection('trading')">
+          <div class="row-main"><span class="mono strong">${t.hour}</span><span class="row-sub">${t.side==='buy'?'Купівля':'Продаж'} · ${t.time}</span></div>
+          <div class="row-side"><span class="mono">${fmtMoney(t.price)} грн</span><span class="row-sub">${t.volume} МВт·г</span></div>
+        </div>`).join('')}</div>`;
+  } else {
+    document.getElementById('dashKpi').innerHTML = currentPlatform.categories.map(catId=>{
+      const cat = CATEGORIES.find(c=>c.id===catId);
+      const inst = cat.instruments[0];
+      const last = inst.prices[inst.prices.length-1], prev = inst.prices[inst.prices.length-2];
+      return kpi(inst.name, last, cat.unit, pctStr(last,prev), "showSection('quotes')");
+    }).join('');
+
+    document.getElementById('dashCardLeft').innerHTML = `
+      <div class="section-head"><h2><svg class="ic sm"><use href="#${currentPlatform.icon}"/></svg> ${currentPlatform.code ? currentPlatform.code+' · ' : ''}${currentPlatform.title}</h2></div>
+      <p class="hint-text">${currentPlatform.desc}</p>
+      <span class="pill pill-info">${currentPlatform.badge}</span>`;
+
+    const firstCat = CATEGORIES.find(c=>c.id===currentPlatform.categories[0]);
+    const firstInst = firstCat.instruments[0];
+    const pts2 = buildSparkline(firstInst.prices, 300, 74, 8);
+    const last2 = firstInst.prices[firstInst.prices.length-1], prev2 = firstInst.prices[firstInst.prices.length-2];
+    const gap2 = pctStr(last2, prev2), up2 = gap2.startsWith('+');
+    document.getElementById('dashCardRight').innerHTML = `
+      <div class="section-head"><h2>${firstInst.name}</h2><span class="link" onclick="showSection('quotes')">котирування →</span></div>
+      <div class="quote-price-row"><span class="quote-price mono">${fmtMoney(last2)} <span class="quote-unit">${firstCat.unit}</span></span><span class="pill ${up2?'pill-success':'pill-critical'}"><svg class="ic tiny"><use href="#${up2?'i-up':'i-down'}"/></svg>${gap2}</span></div>
+      <svg viewBox="0 0 300 74" class="dayline"><polyline points="${pts2}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  const sessions = nextSessions(3);
+  document.getElementById('dashSessionsTitle').textContent = 'Найближчі торгові сесії';
+  document.getElementById('dashSessionsLink').textContent = 'календар →';
+  document.getElementById('dashSessionsLink').onclick = ()=>showSection('calendar');
+  document.getElementById('dashSessions').innerHTML = sessions.map(s=>`
+    <div class="row-item" onclick="showSection('calendar')">
+      <div class="row-main"><span class="strong">${s.dateLabel}</span><span class="row-sub">${s.items.map(i=>i.label).join(' · ')}</span></div>
+      <span class="chevr"><svg class="ic sm"><use href="#i-calendar"/></svg></span>
+    </div>`).join('');
+
+  document.getElementById('dashPendingTitle').textContent = 'Мої останні заявки';
+  document.getElementById('dashPendingLink').textContent = 'торги →';
+  document.getElementById('dashPendingLink').onclick = ()=>showSection('trading');
+  const recentOrders = myOrders.slice(0,4);
+  document.getElementById('dashPending').innerHTML = recentOrders.length ? recentOrders.map(o=>{
+    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:['pill-neutral','Скасовано'];
+    return `<div class="row-item" onclick="showSection('trading')">
+      <div class="row-main"><span class="strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${fmtMoney(o.price)} ${o.unit} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
+      <span class="pill ${st[0]}">${st[1]}</span>
+    </div>`;
+  }).join('') : `<p class="hint-text pad">Ви ще не виставляли заявок.</p>`;
+}
+
+// ---------- staff (accreditation) dashboard ----------
+function renderStaffDashboard(){
+  const pending = participants.filter(p=>p.status==='pending');
+  const accredited = participants.filter(p=>p.status==='accredited');
+  const suspended = participants.filter(p=>p.status==='suspended');
+
+  document.getElementById('dashKpi').innerHTML = `
+    <div class="card kpi"><span class="kpi-lbl">На розгляді</span><span class="kpi-num">${pending.length}</span><span class="pill pill-warning">потребує рішення</span></div>
+    <div class="card kpi"><span class="kpi-lbl">Акредитовано</span><span class="kpi-num">${accredited.length}</span><span class="pill pill-success">активні</span></div>
+    <div class="card kpi"><span class="kpi-lbl">Призупинено</span><span class="kpi-num">${suspended.length}</span><span class="pill pill-critical">обмежені</span></div>
+    <div class="card kpi"><span class="kpi-lbl">Усього в реєстрі</span><span class="kpi-num">${participants.length}</span><span class="pill pill-info">учасників</span></div>`;
+
+  document.getElementById('dashCardLeft').innerHTML = `
+    <div class="section-head"><h2><svg class="ic sm"><use href="#i-users"/></svg> Черга заявок на акредитацію</h2><span class="link" onclick="showSection('participants')">реєстр →</span></div>
+    ${pending.length ? pending.map(p=>`
+      <div class="row-item" onclick="showSection('participants');selectParticipant('${p.id}')">
+        <div class="row-main"><span class="strong">${p.name}</span><span class="row-sub">${p.segment} · ${p.city} · подано ${p.since}</span></div>
+        <span class="pill pill-warning">На розгляді</span>
+      </div>`).join('') : `<p class="hint-text pad">Нових заявок немає.</p>`}`;
+
+  document.getElementById('dashCardRight').innerHTML = `
+    <div class="section-head"><h2>Акредитовані учасники за сегментом</h2></div>
+    ${['Виробник','Постачальник','Трейдер','Споживач'].map(seg=>{
+      const n = accredited.filter(p=>p.segment===seg).length;
+      return `<div class="row-item"><div class="row-main"><span class="strong">${seg}</span></div><span class="pill pill-neutral">${n}</span></div>`;
+    }).join('')}`;
+
+  document.getElementById('dashSessionsTitle').textContent = 'Призупинені учасники';
+  document.getElementById('dashSessionsLink').textContent = 'реєстр →';
+  document.getElementById('dashSessionsLink').onclick = ()=>showSection('participants');
+  document.getElementById('dashSessions').innerHTML = suspended.length ? suspended.map(p=>`
+    <div class="row-item" onclick="showSection('participants');selectParticipant('${p.id}')">
+      <div class="row-main"><span class="strong">${p.name}</span><span class="row-sub">${p.segment} · ${p.city}</span></div>
+      <span class="pill pill-critical">Призупинено</span>
+    </div>`).join('') : `<p class="hint-text pad">Призупинених учасників немає.</p>`;
+
+  const recentlyAccredited = [...accredited].sort((a,b)=> new Date(b.since) - new Date(a.since)).slice(0,4);
+  document.getElementById('dashPendingTitle').textContent = 'Нещодавно акредитовані';
+  document.getElementById('dashPendingLink').textContent = 'реєстр →';
+  document.getElementById('dashPendingLink').onclick = ()=>showSection('participants');
+  document.getElementById('dashPending').innerHTML = recentlyAccredited.length ? recentlyAccredited.map(p=>`
+    <div class="row-item" onclick="showSection('participants');selectParticipant('${p.id}')">
+      <div class="row-main"><span class="strong">${p.name}</span><span class="row-sub">${p.segment} · з ${p.since}</span></div>
+      <span class="pill pill-success">Акредитовано</span>
+    </div>`).join('') : `<p class="hint-text pad">Немає даних.</p>`;
+}
+
+function gateTarget(){
+  const t = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate(), 13,0,0);
+  if(t.getTime() <= TODAY.getTime()) t.setDate(t.getDate()+1);
+  return t;
+}
+function tickGate(){
+  const now = new Date();
+  const nowSim = new Date(TODAY.getTime() + (now.getTime() - INIT_REAL_TIME));
+  let target = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate(), 13,0,0);
+  if(target.getTime() <= nowSim.getTime()) target.setDate(target.getDate()+1);
+  let diff = Math.max(0, target.getTime() - nowSim.getTime());
+  const hh = Math.floor(diff/3600000); diff -= hh*3600000;
+  const mm = Math.floor(diff/60000); diff -= mm*60000;
+  const ss = Math.floor(diff/1000);
+  const str = String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+  const el1 = document.getElementById('gateCountdown'); if(el1) el1.textContent = str;
+  const el2 = document.getElementById('gateCountdownMini'); if(el2) el2.textContent = str;
+}
+const INIT_REAL_TIME = Date.now();
+setInterval(tickGate, 1000);
+
+function nextSessions(n){
+  const out = [];
+  let d = new Date(TODAY);
+  d.setDate(d.getDate()+1);
+  for(let i=0;i<n;i++){
+    out.push({ dateLabel: d.toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit'})+' — '+d.toLocaleDateString('uk-UA',{weekday:'short'}), items: sessionItemsFor(d) });
+    d = new Date(d); d.setDate(d.getDate()+1);
+  }
+  return out;
+}
+function sessionItemsFor(d){
+  const items = [{ label:'РДН, гейт-закриття 13:00' }];
+  if(d.getDay()===2) items.push({ label:'Аукціон: нафтопродукти' });
+  if(d.getDay()===4) items.push({ label:'Аукціон: вугільна продукція' });
+  return items;
+}
+
+// ---------- trading ----------
+function renderTrading(){
+  if(!currentPlatform) return;
+  const markets = marketsForPlatform(currentPlatform);
+  if(!markets.find(m=>m.key===selectedMarket)) selectedMarket = markets[0].key;
+
+  if(currentPlatform.id==='power'){
+    document.getElementById('tradingTitle').textContent = 'Торги на добу наперед (РДН)';
+    document.getElementById('tradingSub').textContent = 'Постачання на ' + DELIVERY.toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · оберіть годину постачання, щоб побачити стакан заявок';
+  } else {
+    const label = currentPlatform.code ? currentPlatform.code+' · '+currentPlatform.title : currentPlatform.title;
+    document.getElementById('tradingTitle').textContent = 'Торги — ' + label;
+    document.getElementById('tradingSub').textContent = 'Поточна торгова сесія · оберіть інструмент, щоб побачити стакан заявок';
+  }
+
+  const strip = document.getElementById('hourStrip');
+  strip.innerHTML = markets.map(m=>
+    `<button class="hour-btn ${m.key===selectedMarket?'active':''}" onclick="selectMarket('${m.key}')">${escapeHtml(m.label)}<span class="hour-price mono">${fmtMoney(m.base)}</span></button>`).join('');
+  renderOrderBook();
+  renderMyOrders();
+}
+function selectMarket(key){ selectedMarket = key; renderTrading(); }
+function renderOrderBook(){
+  const m = currentMarket();
+  const book = getBook(m.key);
+  document.getElementById('obHourLabel').textContent = m.label;
+  document.getElementById('fOrderPriceLbl').textContent = 'Ціна, ' + m.unit;
+  document.getElementById('fOrderVolLbl').textContent = 'Обсяг, ' + m.volUnit;
+  const bestBid = book.bids[0] ? book.bids[0].price : null;
+  const bestAsk = book.asks[0] ? book.asks[0].price : null;
+  const clearing = (bestBid!=null && bestAsk!=null) ? (bestBid+bestAsk)/2 : null;
+  document.getElementById('obClearing').textContent = clearing!=null ? 'Індикативна ціна: '+fmtMoney(clearing)+' '+m.unit : 'Немає зустрічних заявок';
+
+  document.getElementById('obBids').innerHTML = book.bids.length ? book.bids.map(b=>`
+    <div class="ob-row ${b.mine?'ob-mine':''}"><span class="mono">${fmtMoney(b.price)}</span><span class="mono ob-vol">${fmtNum(b.volume)}</span>${b.mine?`<button class="ob-cancel" onclick="cancelOrder('${b.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
+    : `<p class="hint-text pad">Заявок на купівлю немає.</p>`;
+  document.getElementById('obAsks').innerHTML = book.asks.length ? book.asks.map(a=>`
+    <div class="ob-row ${a.mine?'ob-mine':''}"><span class="mono">${fmtMoney(a.price)}</span><span class="mono ob-vol">${fmtNum(a.volume)}</span>${a.mine?`<button class="ob-cancel" onclick="cancelOrder('${a.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
+    : `<p class="hint-text pad">Заявок на продаж немає.</p>`;
+
+  const free = freeLimitFor(MY_COMPANY_ID);
+  const p = participants.find(x=>x.id===MY_COMPANY_ID);
+  document.getElementById('limitFill').style.width = Math.min(100, (usedLimitFor(MY_COMPANY_ID)/p.limit*100))+'%';
+  document.getElementById('limitText').textContent = fmtNum(free)+' з '+fmtNum(p.limit)+' МВт·г вільно (спільний ліміт по всіх платформах)';
+}
+function setOrderSide(side){
+  orderSide = side;
+  document.getElementById('sideBuyBtn').classList.toggle('active', side==='buy');
+  document.getElementById('sideSellBtn').classList.toggle('active', side==='sell');
+}
+function clearOrderVolError(){ document.getElementById('fOrderVolField').classList.remove('field-invalid'); }
+function submitOrder(){
+  const m = currentMarket();
+  const priceInput = document.getElementById('fOrderPrice');
+  const volInput = document.getElementById('fOrderVolume');
+  const price = parseFloat(priceInput.value);
+  const volume = parseFloat(volInput.value);
+  if(!volume || volume<=0){ document.getElementById('fOrderVolField').classList.add('field-invalid'); document.getElementById('fOrderVolError').textContent = 'Вкажіть обсяг заявки в ' + m.volUnit + '.'; return; }
+  const free = freeLimitFor(MY_COMPANY_ID);
+  if(volume > free){
+    document.getElementById('fOrderVolField').classList.add('field-invalid');
+    document.getElementById('fOrderVolError').textContent = `Обсяг перевищує вільний ліміт учасника (доступно ${fmtNum(free)} ${m.volUnit}) — зменшіть обсяг або скасуйте активну заявку.`;
+    return;
+  }
+  if(!price || price<=0){ toast('Вкажіть ціну заявки'); return; }
+  clearOrderVolError();
+
+  const book = getBook(m.key);
+  const id = 'o'+(orderSeq++);
+  let status = 'active';
+  if(orderSide==='buy'){
+    if(book.asks.length && price >= book.asks[0].price){
+      status = 'matched';
+      book.asks[0].volume -= volume;
+      if(book.asks[0].volume<=0) book.asks.shift();
+    } else {
+      book.bids.push({ id:'seed', price, volume, mine:id });
+      book.bids.sort((a,b)=>b.price-a.price);
+    }
+  } else {
+    if(book.bids.length && price <= book.bids[0].price){
+      status = 'matched';
+      book.bids[0].volume -= volume;
+      if(book.bids[0].volume<=0) book.bids.shift();
+    } else {
+      book.asks.push({ id:'seed', price, volume, mine:id });
+      book.asks.sort((a,b)=>a.price-b.price);
+    }
+  }
+  myOrders.unshift({ id, platformId:currentPlatform.id, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price, volume, status });
+  priceInput.value=''; volInput.value='';
+  toast(status==='matched' ? `Заявку виконано за ціною ${fmtMoney(price)} ${m.unit}` : 'Заявку прийнято до стакану');
+  renderOrderBook(); renderMyOrders();
+}
+function cancelOrder(id){
+  const o = myOrders.find(x=>x.id===id);
+  if(!o || o.status!=='active'){ toast('Виконану заявку скасувати не можна'); return; }
+  const wasOnOtherPlatform = o.platformId !== currentPlatform.id;
+  const markets = marketsForPlatform(PLATFORMS.find(p=>p.id===o.platformId));
+  const key = markets.find(m=>m.label===o.marketLabel)?.key;
+  if(key && orderBooks[key]){
+    orderBooks[key].bids = orderBooks[key].bids.filter(b=>b.mine!==id);
+    orderBooks[key].asks = orderBooks[key].asks.filter(a=>a.mine!==id);
+  }
+  o.status = 'cancelled';
+  toast('Заявку скасовано' + (wasOnOtherPlatform ? ' (' + o.marketLabel + ')' : ''));
+  renderOrderBook(); renderMyOrders();
+}
+function renderMyOrders(){
+  const box = document.getElementById('myOrdersList');
+  if(!myOrders.length){ box.innerHTML = `<p class="hint-text pad">Заявок ще немає.</p>`; return; }
+  box.innerHTML = myOrders.map(o=>{
+    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:['pill-neutral','Скасовано'];
+    const plat = PLATFORMS.find(p=>p.id===o.platformId);
+    const platLabel = plat ? plat.badge : '';
+    return `<div class="row-item">
+      <div class="row-main"><span class="mono strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${platLabel} · ${fmtMoney(o.price)} ${o.unit} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
+      <div class="row-side"><span class="pill ${st[0]}">${st[1]}</span>${o.status==='active'?`<button class="icon-btn" onclick="cancelOrder('${o.id}')" aria-label="Скасувати"><svg class="ic sm"><use href="#i-close"/></svg></button>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- technical analysis helpers ----------
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h = Math.imul(31,h)+s.charCodeAt(i)|0; } return h>>>0; }
+function mulberry32(seed){
+  let a = seed;
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function genCandles(instId, lastClose, n=60){
+  const rnd = mulberry32(hashStr(instId));
+  const closes = new Array(n);
+  closes[n-1] = lastClose;
+  for(let i=n-2;i>=0;i--){
+    const ret = (rnd()-0.5)*0.03;
+    closes[i] = closes[i+1] / (1+ret);
+  }
+  const candles = [];
+  let prevClose = closes[0] * (1-(rnd()-0.5)*0.01);
+  for(let i=0;i<n;i++){
+    const open = prevClose;
+    const close = closes[i];
+    const hi = Math.max(open,close) * (1 + rnd()*0.008);
+    const lo = Math.min(open,close) * (1 - rnd()*0.008);
+    candles.push({ o:open, h:hi, l:lo, c:close });
+    prevClose = close;
+  }
+  return candles;
+}
+function ema(values, period){
+  const k = 2/(period+1);
+  const out = new Array(values.length);
+  out[0] = values[0];
+  for(let i=1;i<values.length;i++) out[i] = values[i]*k + out[i-1]*(1-k);
+  return out;
+}
+function macdCalc(closes){
+  const ema12 = ema(closes,12), ema26 = ema(closes,26);
+  const macdLine = closes.map((_,i)=>ema12[i]-ema26[i]);
+  const signal = ema(macdLine,9);
+  const hist = macdLine.map((v,i)=>v-signal[i]);
+  return { macdLine, signal, hist };
+}
+function rsiCalc(closes, period=14){
+  const rsi = new Array(closes.length).fill(50);
+  let avgGain=0, avgLoss=0;
+  for(let i=1;i<closes.length;i++){
+    const change = closes[i]-closes[i-1];
+    const gain = Math.max(change,0), loss = Math.max(-change,0);
+    if(i<=period){ avgGain += gain/period; avgLoss += loss/period; }
+    else{ avgGain = (avgGain*(period-1)+gain)/period; avgLoss = (avgLoss*(period-1)+loss)/period; }
+    if(i>=period) rsi[i] = avgLoss===0 ? 100 : 100 - (100/(1+avgGain/avgLoss));
+  }
+  return rsi;
+}
+function scaleY(v, min, max, h, pad){ const span=(max-min)||1; return h-pad-((v-min)/span)*(h-pad*2); }
+function buildCandlestickSVG(candles, w=600, h=170, pad=10){
+  const highs = candles.map(c=>c.h), lows = candles.map(c=>c.l);
+  const max = Math.max(...highs), min = Math.min(...lows);
+  const n = candles.length;
+  const slot = (w-pad*2)/n;
+  const bodyW = Math.max(1.6, slot*0.62);
+  const y = v => scaleY(v,min,max,h,pad);
+  return candles.map((c,i)=>{
+    const x = pad + i*slot + slot/2;
+    const up = c.c>=c.o;
+    const color = up ? 'var(--buy)' : 'var(--sell)';
+    const yOpen=y(c.o), yClose=y(c.c);
+    const top=Math.min(yOpen,yClose), bh=Math.max(1,Math.abs(yOpen-yClose));
+    return `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${y(c.h).toFixed(1)}" y2="${y(c.l).toFixed(1)}" stroke="${color}" stroke-width="1"/><rect x="${(x-bodyW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bodyW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${color}"/>`;
+  }).join('');
+}
+function buildMacdSVG(macdLine, signal, hist, w=600, h=64, pad=8){
+  const all = [...macdLine, ...signal];
+  const max = Math.max(...all), min = Math.min(...all);
+  const n = macdLine.length;
+  const slot = (w-pad*2)/n;
+  const y = v => scaleY(v,min,max,h,pad);
+  const zeroY = y(0);
+  const bars = hist.map((v,i)=>{
+    const x = pad + i*slot + slot/2;
+    const yy = y(v);
+    const top = Math.min(yy,zeroY), bh = Math.max(1,Math.abs(yy-zeroY));
+    return `<rect x="${(x-slot*0.3).toFixed(1)}" y="${top.toFixed(1)}" width="${(slot*0.6).toFixed(1)}" height="${bh.toFixed(1)}" fill="${v>=0?'var(--buy)':'var(--sell)'}" opacity=".55"/>`;
+  }).join('');
+  const macdPts = macdLine.map((v,i)=>(pad+i*slot+slot/2).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+  const sigPts = signal.map((v,i)=>(pad+i*slot+slot/2).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+  return `${bars}<polyline points="${macdPts}" fill="none" stroke="var(--accent)" stroke-width="1.6"/><polyline points="${sigPts}" fill="none" stroke="var(--info-text)" stroke-width="1.3" stroke-dasharray="3,2"/>`;
+}
+function buildRsiSVG(rsi, w=600, h=64, pad=8){
+  const n = rsi.length;
+  const slot = (w-pad*2)/n;
+  const y = v => h-pad-(v/100)*(h-pad*2);
+  const pts = rsi.map((v,i)=>(pad+i*slot).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+  const y30=y(30).toFixed(1), y70=y(70).toFixed(1);
+  return `<line x1="${pad}" x2="${w-pad}" y1="${y70}" y2="${y70}" stroke="var(--sell)" stroke-width="1" stroke-dasharray="3,2"/><line x1="${pad}" x2="${w-pad}" y1="${y30}" y2="${y30}" stroke="var(--buy)" stroke-width="1" stroke-dasharray="3,2"/><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.8"/>`;
+}
+
+// ---------- quotations ----------
+function renderQuotes(){
+  if(!currentPlatform || !currentPlatform.categories.length) return;
+  const availableCats = CATEGORIES.filter(c=>currentPlatform.categories.includes(c.id));
+  if(!availableCats.find(c=>c.id===activeCat)) activeCat = availableCats[0].id;
+  document.getElementById('quoteCats').innerHTML = availableCats.map(c=>
+    `<button class="chip ${c.id===activeCat?'chip-active':''}" onclick="setCat('${c.id}')"><svg class="ic tiny"><use href="#${c.icon}"/></svg> ${c.label}</button>`).join('');
+  const cat = availableCats.find(c=>c.id===activeCat);
+  document.getElementById('quoteInstruments').innerHTML = cat.instruments.map(inst=>{
+    const last = inst.prices[inst.prices.length-1];
+    const prev = inst.prices[inst.prices.length-2];
+    const gap = pctStr(last, prev);
+    const up = gap.startsWith('+');
+    const pts = buildSparkline(inst.prices, 300, 74, 8);
+    const rows = DATES.map((d,i)=>`<tr><td>${d}</td><td class="mono">${fmtMoney(inst.prices[i])}</td><td class="mono">${fmtNum(inst.vols[i],1)}</td></tr>`).reverse().join('');
+
+    const candles = genCandles(inst.id, last, 60);
+    const closes = candles.map(c=>c.c);
+    const { macdLine, signal, hist } = macdCalc(closes);
+    const rsi = rsiCalc(closes, 14);
+    const lastMacd = macdLine[macdLine.length-1], lastSignal = signal[signal.length-1];
+    const lastRsi = rsi[rsi.length-1];
+    const rsiTag = lastRsi>=70 ? ['pill-critical','Перекуплено'] : lastRsi<=30 ? ['pill-success','Перепродано'] : ['pill-neutral','Нейтрально'];
+    const macdBull = lastMacd>=lastSignal;
+
+    return `<div class="card quote-card">
+      <div class="section-head">
+        <h3>${inst.name}</h3>
+        <div class="quote-tabs"><button class="qtab active" onclick="toggleQuoteView(this,'chart')">Графік</button><button class="qtab" onclick="toggleQuoteView(this,'candles')">Свічки</button><button class="qtab" onclick="toggleQuoteView(this,'table')">Таблиця</button></div>
+      </div>
+      <div class="quote-view quote-view-chart">
+        <div class="quote-price-row"><span class="quote-price mono">${fmtMoney(last)} <span class="quote-unit">${cat.unit}</span></span><span class="pill ${up?'pill-success':'pill-critical'}"><svg class="ic tiny"><use href="#${up?'i-up':'i-down'}"/></svg>${gap}</span></div>
+        <svg viewBox="0 0 300 74" class="dayline"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="quote-view quote-view-candles" style="display:none">
+        <div class="quote-price-row"><span class="quote-price mono">${fmtMoney(last)} <span class="quote-unit">${cat.unit}</span></span><span class="pill pill-neutral">60 умовних торгових днів</span></div>
+        <svg viewBox="0 0 600 170" class="dayline candle-svg" preserveAspectRatio="none">${buildCandlestickSVG(candles,600,170,10)}</svg>
+        <div class="indicator-block">
+          <div class="indicator-head"><span class="indicator-name">MACD (12, 26, 9)</span><span class="pill ${macdBull?'pill-success':'pill-critical'}">${macdBull?'Бичачий перетин':'Ведмежий перетин'}</span></div>
+          <svg viewBox="0 0 600 64" class="dayline" preserveAspectRatio="none">${buildMacdSVG(macdLine,signal,hist,600,64,8)}</svg>
+        </div>
+        <div class="indicator-block">
+          <div class="indicator-head"><span class="indicator-name">RSI (14)</span><span class="pill ${rsiTag[0]}">${lastRsi.toFixed(1)} · ${rsiTag[1]}</span></div>
+          <svg viewBox="0 0 600 64" class="dayline" preserveAspectRatio="none">${buildRsiSVG(rsi,600,64,8)}</svg>
+        </div>
+      </div>
+      <div class="quote-view quote-view-table" style="display:none">
+        <div class="table-card"><table class="fluent-table"><thead><tr><th>Дата</th><th>Ціна, ${cat.unit}</th><th>Обсяг, ${cat.volUnit}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setCat(id){ activeCat = id; renderQuotes(); }
+function toggleQuoteView(btn, view){
+  const card = btn.closest('.quote-card');
+  card.querySelectorAll('.qtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  card.querySelector('.quote-view-chart').style.display = view==='chart' ? '' : 'none';
+  card.querySelector('.quote-view-candles').style.display = view==='candles' ? '' : 'none';
+  card.querySelector('.quote-view-table').style.display = view==='table' ? '' : 'none';
+}
+
+// ---------- calendar ----------
+let calCursor = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+let calSelected = null;
+function renderCalendar(){
+  document.getElementById('calMonthLabel').textContent = calCursor.toLocaleDateString('uk-UA',{month:'long', year:'numeric'});
+  const firstDay = new Date(calCursor.getFullYear(), calCursor.getMonth(), 1);
+  const startOffset = (firstDay.getDay()+6)%7; // Monday-first
+  const daysInMonth = new Date(calCursor.getFullYear(), calCursor.getMonth()+1, 0).getDate();
+  const cells = [];
+  const dow = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  let html = dow.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++) html += `<div class="cal-cell cal-empty"></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const d = new Date(calCursor.getFullYear(), calCursor.getMonth(), day);
+    const items = sessionItemsFor(d);
+    const isToday = d.toDateString()===TODAY.toDateString();
+    const key = d.toISOString().slice(0,10);
+    html += `<button class="cal-cell ${isToday?'cal-today':''} ${calSelected===key?'cal-selected':''}" onclick="calSelect('${key}')">
+      <span class="cal-daynum">${day}</span>
+      <span class="cal-dots">${items.map(()=>'<i></i>').join('')}</span>
+    </button>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+  if(calSelected) calSelect(calSelected, true);
+}
+function calSelect(key, silent){
+  calSelected = key;
+  if(!silent) renderCalendar();
+  const d = new Date(key+'T00:00:00');
+  const items = sessionItemsFor(d);
+  document.getElementById('calSessionCard').style.display = '';
+  document.getElementById('calSelDate').textContent = d.toLocaleDateString('uk-UA',{weekday:'long', day:'numeric', month:'long'});
+  const isToday = d.toDateString()===TODAY.toDateString();
+  document.getElementById('calSessionList').innerHTML = items.map(i=>`
+    <div class="row-item">
+      <div class="row-main"><span class="strong">${i.label}</span></div>
+      <span class="pill ${isToday?'pill-info':'pill-neutral'}">${isToday?'Триває':'Заплановано'}</span>
+      ${i.label.startsWith('РДН') ? `<button class="btn sm btn-accent" onclick="showSection('trading')">До торгів</button>` : ''}
+    </div>`).join('') || `<p class="hint-text pad">Сесій немає.</p>`;
+}
+
+// ---------- participants ----------
+function renderParticipantList(){
+  const filters = currentRole==='staff' ? ['all','accredited','pending','suspended'] : ['all','accredited','suspended'];
+  const labels = {all:'Усі', accredited:'Акредитовано', pending:'На розгляді', suspended:'Призупинено'};
+  if(currentRole==='trader' && activePartFilter==='pending') activePartFilter='all';
+  document.getElementById('partFilters').innerHTML = filters.map(f=>
+    `<button class="chip ${activePartFilter===f?'chip-active':''}" onclick="setPartFilter('${f}')">${labels[f]}</button>`).join('');
+
+  const q = (document.getElementById('partSearch').value||'').trim().toLowerCase();
+  let list = participants.filter(p=> activePartFilter==='all' || p.status===activePartFilter);
+  if(currentRole==='trader') list = list.filter(p=> p.status!=='pending' || p.id===MY_COMPANY_ID);
+  if(q) list = list.filter(p=> p.name.toLowerCase().includes(q) || p.edrpou.includes(q));
+
+  const statusPill = {accredited:['pill-success','Акредитовано'], pending:['pill-warning','На розгляді'], suspended:['pill-critical','Призупинено']};
+  document.getElementById('partListItems').innerHTML = list.length ? list.map(p=>{
+    const st = statusPill[p.status];
+    return `<button class="list-item ${selectedPartId===p.id?'selected':''}" onclick="selectParticipant('${p.id}')">
+      <div class="list-item-top"><span class="strong">${p.name}</span></div>
+      <div class="list-item-sub">${p.segment} · ${p.city} · <span class="pill ${st[0]}">${st[1]}</span></div>
+    </button>`;
+  }).join('') : `<p class="hint-text pad">Нічого не знайдено.</p>`;
+
+  if(selectedPartId && !list.find(p=>p.id===selectedPartId)){ selectedPartId=null; }
+  renderParticipantDetail();
+}
+function setPartFilter(f){ activePartFilter=f; renderParticipantList(); }
+function selectParticipant(id){ selectedPartId=id; renderParticipantList(); }
+function renderParticipantDetail(){
+  const box = document.getElementById('partDetail');
+  if(!selectedPartId){
+    box.innerHTML = `<div class="detail-empty"><svg class="ic lg"><use href="#i-users"/></svg><h3>Оберіть учасника</h3><p>Клікніть на компанію в списку зліва, щоб побачити картку.</p></div>`;
+    return;
+  }
+  const p = participants.find(x=>x.id===selectedPartId);
+  const statusPill = {accredited:['pill-success','Акредитовано'], pending:['pill-warning','На розгляді'], suspended:['pill-critical','Призупинено']};
+  const st = statusPill[p.status];
+  const isOwn = p.id===MY_COMPANY_ID;
+  const canSeePrivate = currentRole==='staff' || isOwn;
+  const canManage = currentRole==='staff';
+
+  const factsHtml = canSeePrivate ? `
+      <div class="fact"><span class="fact-lbl">Контактна особа</span><span class="fact-val">${p.contact}</span></div>
+      <div class="fact"><span class="fact-lbl">Телефон</span><span class="fact-val mono">${p.phone}</span></div>
+      <div class="fact"><span class="fact-lbl">Активних договорів</span><span class="fact-val">${p.contracts}</span></div>
+      <div class="fact"><span class="fact-lbl">Ліміт на добу</span><span class="fact-val mono">${fmtNum(p.limit)} МВт·г</span></div>` : `
+      <div class="fact"><span class="fact-lbl">Сегмент</span><span class="fact-val">${p.segment}</span></div>
+      <div class="fact"><span class="fact-lbl">Місто</span><span class="fact-val">${p.city}</span></div>
+      <div class="fact"><span class="fact-lbl">Учасник з</span><span class="fact-val">${p.since}</span></div>
+      <div class="fact"><span class="fact-lbl">Контактні дані</span><span class="fact-val">приховано для інших учасників</span></div>`;
+
+  const usageBlock = canSeePrivate ? `
+    <div class="section-head sub"><h3>Використання ліміту</h3></div>
+    <div class="limit-box">
+      <div class="limit-track"><div class="limit-fill" style="width:${Math.min(100,(p.used/p.limit*100))}%"></div></div>
+      <span class="micro">${fmtNum(p.used)} з ${fmtNum(p.limit)} МВт·г використано</span>
+    </div>` : '';
+
+  const actionsBlock = canManage ? `
+    <div class="section-head sub"><h3>Дії</h3></div>
+    <div class="detail-actions">
+      ${p.status==='pending' ? `<button class="btn btn-accent" onclick="setPartStatus('${p.id}','accredited')"><svg class="ic sm"><use href="#i-check"/></svg>Акредитувати</button><button class="btn btn-subtle" onclick="setPartStatus('${p.id}','suspended')">Відхилити</button>` : ''}
+      ${p.status==='accredited' ? `<button class="btn btn-subtle" onclick="setPartStatus('${p.id}','suspended')"><svg class="ic sm"><use href="#i-alert"/></svg>Призупинити акредитацію</button>` : ''}
+      ${p.status==='suspended' ? `<button class="btn btn-accent" onclick="setPartStatus('${p.id}','accredited')"><svg class="ic sm"><use href="#i-shield"/></svg>Відновити акредитацію</button>` : ''}
+    </div>` : (isOwn ? `<div class="section-head sub"><h3>Дії</h3></div><p class="hint-text pad">Рішення про акредитацію ухвалює відділ акредитації біржі — учасник не може змінювати власний статус.</p>` : '');
+
+  box.innerHTML = `
+    <div class="detail-head">
+      <div><div class="detail-eyebrow">${p.segment} · ЄДРПОУ ${p.edrpou}</div><h2>${p.name}${isOwn?' <span class="pill pill-info">Ваша компанія</span>':''}</h2><div class="detail-sub">${p.city} · акредитовано з ${p.since}</div></div>
+      <span class="pill ${st[0]}">${st[1]}</span>
+    </div>
+    <div class="fact-grid">${factsHtml}</div>
+    ${usageBlock}
+    ${actionsBlock}
+  `;
+}
+function setPartStatus(id, status){
+  const p = participants.find(x=>x.id===id);
+  p.status = status;
+  toast('Статус учасника оновлено');
+  renderParticipantList();
+}
+
+// ---------- reports ----------
+function renderReports(){
+  const top5 = [...participants].sort((a,b)=>b.used-a.used).slice(0,5);
+  const max = top5[0].used;
+  document.getElementById('repTop5').innerHTML = top5.map(p=>`
+    <div class="hbar-row"><div class="hbar-top"><span>${p.name}</span><span class="mono">${fmtNum(p.used)} МВт·г</span></div><div class="hbar-track"><div class="hbar-fill" style="width:${(p.used/max*100)}%"></div></div></div>
+  `).join('');
+
+  const segments = ['Виробник','Постачальник','Трейдер','Споживач'];
+  const totals = segments.map(s=>participants.filter(p=>p.segment===s).reduce((sum,p)=>sum+p.used,0));
+  const grand = totals.reduce((a,b)=>a+b,0);
+  const colors = ['#C9821A','#2F6FED','#1FA97A','#8B5CF6'];
+  document.getElementById('repSegments').innerHTML = `
+    <div class="seg-bar">${segments.map((s,i)=>`<span style="width:${(totals[i]/grand*100)}%;background:${colors[i]}"></span>`).join('')}</div>
+    <div class="seg-legend">${segments.map((s,i)=>`<span class="seg-legend-item"><i style="background:${colors[i]}"></i>${s} — ${(totals[i]/grand*100).toFixed(1)}%</span>`).join('')}</div>
+  `;
+
+  const monthly = [14200,14800,15100,15600,15300,16000,16400,16700];
+  const months = ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Серп'];
+  const pts = buildSparkline(monthly, 600, 110, 14);
+  const dots = monthly.map((v,i)=>{
+    const coords = pts.split(' ')[i].split(',');
+    return `<circle cx="${coords[0]}" cy="${coords[1]}" r="3" fill="var(--accent)"/>`;
+  }).join('');
+  document.getElementById('repTrendSvg').innerHTML = `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+}
+
+// ---------- REMIT reports ----------
+const remitReports = [
+  { name:'Звіт про укладені стандартизовані контракти', period:'Липень 2026', deadline:'05.08.2026', status:'submitted' },
+  { name:'Звіт про позабіржові угоди (OTC)', period:'Липень 2026', deadline:'05.08.2026', status:'submitted' },
+  { name:'Звіт про фундаментальні дані генерації', period:'Серпень 2026, тиждень 1', deadline:'12.08.2026', status:'pending' },
+  { name:'Звіт про доступну потужність', period:'Серпень 2026, тиждень 1', deadline:'12.08.2026', status:'pending' },
+  { name:'Звіт про укладені контракти на газ', period:'Липень 2026', deadline:'05.08.2026', status:'overdue' },
+  { name:'Річний звіт про структуру власності', period:'2025', deadline:'01.04.2026', status:'submitted' },
+];
+function renderRemit(){
+  const stPill = { submitted:['pill-success','Подано'], pending:['pill-warning','Очікує'], overdue:['pill-critical','Прострочено'] };
+  const counts = { submitted:0, pending:0, overdue:0 };
+  remitReports.forEach(r=>counts[r.status]++);
+  document.getElementById('remitKpi').innerHTML = `
+    <div class="card kpi"><span class="kpi-lbl">Подано</span><span class="kpi-num">${counts.submitted}</span><span class="pill pill-success">вчасно</span></div>
+    <div class="card kpi"><span class="kpi-lbl">Очікує подання</span><span class="kpi-num">${counts.pending}</span><span class="pill pill-warning">у роботі</span></div>
+    <div class="card kpi"><span class="kpi-lbl">Прострочено</span><span class="kpi-num">${counts.overdue}</span><span class="pill pill-critical">потребує уваги</span></div>`;
+  document.getElementById('remitRows').innerHTML = remitReports.map((r,i)=>{
+    const st = stPill[r.status];
+    const action = r.status==='submitted' ? `<button class="btn sm btn-subtle" onclick="toast('Перегляд звіту (демо)')">Переглянути</button>` : `<button class="btn sm btn-accent" onclick="submitRemitReport(${i})">Подати</button>`;
+    return `<tr><td>${r.name}</td><td>${r.period}</td><td class="mono">${r.deadline}</td><td><span class="pill ${st[0]}">${st[1]}</span></td><td>${action}</td></tr>`;
+  }).join('');
+}
+function submitRemitReport(i){
+  remitReports[i].status = 'submitted';
+  toast('Звіт подано регулятору');
+  renderRemit();
+}
+
+// ---------- lots ----------
+const lots = [
+  { id:'L-2026-014', desc:'Продаж надлишкового трансформаторного обладнання, 6 од.', start:820000, bid:915000, step:10000, deadline:'14.08.2026 15:00', status:'active' },
+  { id:'L-2026-015', desc:'Право оренди виробничого майданчика, м. Біла Церква', start:1450000, bid:1450000, step:25000, deadline:'20.08.2026 15:00', status:'active' },
+  { id:'L-2026-011', desc:'Продаж непрофільних транспортних засобів, 4 од.', start:610000, bid:742000, step:8000, deadline:'02.08.2026 15:00', status:'closed' },
+  { id:'L-2026-018', desc:'Продаж металобрухту із демонтажу мереж', start:270000, bid:270000, step:5000, deadline:'28.08.2026 15:00', status:'planned' },
+];
+function renderLots(){
+  const stPill = { active:['pill-info','Активний'], closed:['pill-neutral','Завершено'], planned:['pill-warning','Заплановано'] };
+  document.getElementById('lotsGrid').innerHTML = lots.map((l,i)=>{
+    const st = stPill[l.status];
+    return `<div class="card lot-card">
+      <div class="section-head"><h3 class="mono">${l.id}</h3><span class="pill ${st[0]}">${st[1]}</span></div>
+      <p class="hint-text">${l.desc}</p>
+      <div class="fact-grid">
+        <div class="fact"><span class="fact-lbl">Стартова ціна</span><span class="fact-val mono">${fmtMoney(l.start)} грн</span></div>
+        <div class="fact"><span class="fact-lbl">Поточна ставка</span><span class="fact-val mono">${fmtMoney(l.bid)} грн</span></div>
+        <div class="fact"><span class="fact-lbl">Завершення</span><span class="fact-val mono">${l.deadline}</span></div>
+      </div>
+      ${l.status==='active' ? `<button class="btn btn-accent" onclick="placeBid(${i})"><svg class="ic sm"><use href="#i-gavel"/></svg>Зробити ставку +${fmtMoney(l.step)} грн</button>` : ''}
+    </div>`;
+  }).join('');
+}
+function placeBid(i){
+  lots[i].bid += lots[i].step;
+  toast('Ставку прийнято: ' + fmtMoney(lots[i].bid) + ' грн');
+  renderLots();
+}
+
+// ---------- global search ----------
+function renderGlobalSearch(){
+  const q = document.getElementById('navSearchInput').value.trim().toLowerCase();
+  const box = document.getElementById('navSearchResults');
+  if(!q){ box.classList.remove('open'); box.innerHTML=''; return; }
+  let pool = participants;
+  if(currentRole==='trader') pool = pool.filter(p=> p.status!=='pending' || p.id===MY_COMPANY_ID);
+  const rows = pool.filter(p=>p.name.toLowerCase().includes(q) || p.edrpou.includes(q)).slice(0,6)
+    .map(p=>`<div class="suggest-row" onclick="gotoSearch('${p.id}')"><svg class="ic sm"><use href="#i-users"/></svg><span>${p.name}</span><span class="row-sub">${p.segment}</span></div>`);
+  box.innerHTML = rows.join('') || `<p class="hint-text pad">Нічого не знайдено.</p>`;
+  box.classList.add('open');
+}
+function gotoSearch(id){
+  document.getElementById('navSearchInput').value=''; document.getElementById('navSearchResults').classList.remove('open');
+  showSection('participants'); selectParticipant(id);
+}
+
+// ---------- notifications ----------
+function renderNotifications(){
+  const items = [];
+  if(currentRole==='staff'){
+    participants.filter(p=>p.status==='pending').forEach(p=>items.push({icon:'i-alert', text:`${p.name} очікує розгляду заявки на акредитацію`}));
+  } else {
+    myOrders.filter(o=>o.status==='matched').forEach(o=>items.push({icon:'i-check', text:`Заявку на ${o.side==='buy'?'купівлю':'продаж'} (${o.marketLabel}) виконано`}));
+    items.push({icon:'i-clock', text:'Гейт-закриття заявок на РДН — сьогодні о 13:00'});
+  }
+  document.getElementById('notifList').innerHTML = items.map(i=>`<div class="notif-row"><svg class="ic sm"><use href="#${i.icon}"/></svg><span>${i.text}</span></div>`).join('') || `<p class="hint-text pad">Нових сповіщень немає.</p>`;
+  document.getElementById('notifDot').style.display = items.length ? 'block' : 'none';
+}
+function toggleNotif(e){ e.stopPropagation(); renderNotifications(); document.getElementById('notifPanel').classList.toggle('open'); }
+function closeNotif(){ document.getElementById('notifPanel').classList.remove('open'); }
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.notif-wrap')) closeNotif();
+  if(!e.target.closest('.nav-search-wrap')){ document.getElementById('navSearchResults').classList.remove('open'); }
+});
+
+// ---------- modal / toast / theme ----------
+function openModal(){ document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.innerHTML = `<svg class="ic sm"><use href="#i-check"/></svg><span>${msg}</span>`;
+  el.classList.add('show');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+let maximized = false;
+function toggleMaximize(){
+  maximized = !maximized;
+  document.getElementById('win11Window').classList.toggle('maximized', maximized);
+  document.getElementById('maxIcon').innerHTML = maximized ? '<use href="#i-restore"/>' : '<use href="#i-max"/>';
+}
+function toggleTheme(){
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme')==='dark';
+  root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeIcon').innerHTML = isDark ? '<use href="#i-moon"/>' : '<use href="#i-sun"/>';
+  document.getElementById('themeLabel').textContent = isDark ? 'Темна тема' : 'Світла тема';
+}
+
+// ---------- init ----------
+renderHub();
+renderCalendar();
+tickGate();
+</script>
+
+<style>
+:root{
+  --accent:#C9821A; --accent-hover:#B06F10; --accent-active:#96600D; --accent-soft:#fbe9d0; --accent-text-on:#2a1500;
+  --mica:#f3f1ee; --mica-nav:#f9f7f4; --titlebar:#f3f1ee;
+  --card:#ffffff; --card-2:#fbfaf8;
+  --border:rgba(0,0,0,.08); --border-strong:rgba(0,0,0,.14);
+  --text:#1b1b1b; --text-2:#5c5c5c; --text-3:#8a8a8a;
+  --success:#0f7b0f; --success-bg:#dff6dd;
+  --warning:#9d5d00; --warning-bg:#fff4ce;
+  --critical:#c42b1c; --critical-bg:#fde7e9;
+  --neutral-bg:#f0f0f0; --neutral-text:#5c5c5c;
+  --info-bg:#e8f1fa; --info-text:#0f6cbd;
+  --shadow:0 1.6px 3.6px rgba(0,0,0,.11), 0 0.3px 0.9px rgba(0,0,0,.07);
+  --shadow-lg:0 12px 28px rgba(0,0,0,.16), 0 2px 6px rgba(0,0,0,.1);
+  --radius:8px; --radius-sm:4px;
+  --buy:#0f7b0f; --sell:#c42b1c;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --accent:#F2B33D; --accent-hover:#f5c05e; --accent-active:#f7cd7e; --accent-soft:rgba(242,179,61,.16); --accent-text-on:#2a1500;
+    --mica:#1c1a17; --mica-nav:#23201c; --titlebar:#1c1a17;
+    --card:#2a2723; --card-2:#302c27;
+    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16);
+    --text:#f3f1ee; --text-2:#c8c2ba; --text-3:#8f887f;
+    --success:#6ccb5f; --success-bg:rgba(108,203,95,.14);
+    --warning:#ffd335; --warning-bg:rgba(255,211,53,.14);
+    --critical:#ff99a4; --critical-bg:rgba(255,153,164,.14);
+    --neutral-bg:#3a3632; --neutral-text:#c8c2ba;
+    --info-bg:rgba(96,205,255,.14); --info-text:#60cdff;
+    --buy:#6ccb5f; --sell:#ff99a4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --accent:#F2B33D; --accent-hover:#f5c05e; --accent-active:#f7cd7e; --accent-soft:rgba(242,179,61,.16); --accent-text-on:#2a1500;
+  --mica:#1c1a17; --mica-nav:#23201c; --titlebar:#1c1a17;
+  --card:#2a2723; --card-2:#302c27;
+  --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16);
+  --text:#f3f1ee; --text-2:#c8c2ba; --text-3:#8f887f;
+  --success:#6ccb5f; --success-bg:rgba(108,203,95,.14);
+  --warning:#ffd335; --warning-bg:rgba(255,211,53,.14);
+  --critical:#ff99a4; --critical-bg:rgba(255,153,164,.14);
+  --neutral-bg:#3a3632; --neutral-text:#c8c2ba;
+  --info-bg:rgba(96,205,255,.14); --info-text:#60cdff;
+  --buy:#6ccb5f; --sell:#ff99a4;
+  color-scheme: dark;
+}
+:root[data-theme="light"]{
+  --accent:#C9821A; --accent-hover:#B06F10; --accent-active:#96600D; --accent-soft:#fbe9d0; --accent-text-on:#2a1500;
+  --mica:#f3f1ee; --mica-nav:#f9f7f4; --titlebar:#f3f1ee;
+  --card:#ffffff; --card-2:#fbfaf8;
+  --border:rgba(0,0,0,.08); --border-strong:rgba(0,0,0,.14);
+  --text:#1b1b1b; --text-2:#5c5c5c; --text-3:#8a8a8a;
+  --success:#0f7b0f; --success-bg:#dff6dd;
+  --warning:#9d5d00; --warning-bg:#fff4ce;
+  --critical:#c42b1c; --critical-bg:#fde7e9;
+  --neutral-bg:#f0f0f0; --neutral-text:#5c5c5c;
+  --info-bg:#e8f1fa; --info-text:#0f6cbd;
+  --buy:#0f7b0f; --sell:#c42b1c;
+  color-scheme: light;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family:'Segoe UI Variable Text','Segoe UI',-apple-system,'Yu Gothic UI',system-ui,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1100px 700px at 12% -10%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%),
+    var(--mica);
+  min-height:100vh;
+}
+.ic{ width:18px; height:18px; display:inline-block; vertical-align:middle; flex:none; }
+.ic.tiny{ width:14px; height:14px; }
+.ic.sm{ width:15px; height:15px; }
+.ic.lg{ width:34px; height:34px; }
+.mono{ font-family:'Cascadia Mono','Cascadia Code',Consolas,ui-monospace,'SFMono-Regular',monospace; font-variant-numeric:tabular-nums; }
+.strong{ font-weight:600; }
+
+.desktop{ max-width:1360px; margin:0 auto; padding:28px 20px 56px; }
+.desktop-note{
+  max-width:960px; margin:0 auto 18px; color:var(--text-2); font-size:13px; line-height:1.55;
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:10px 16px;
+}
+.desktop-note strong{ color:var(--text); }
+
+.win11-window{
+  background:var(--mica);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  height:min(900px, 88vh);
+  transition:height .18s ease;
+}
+.win11-window.maximized{ height:92vh; }
+
+.titlebar{
+  height:36px; flex:none; background:var(--titlebar);
+  display:flex; align-items:center; justify-content:space-between;
+  -webkit-user-select:none; user-select:none;
+  border-bottom:1px solid transparent;
+}
+.tb-drag{ display:flex; align-items:center; gap:8px; padding-left:12px; color:var(--text-2); }
+.tb-icon{ color:var(--accent); display:flex; }
+.tb-title{ font-size:12px; }
+.tb-caption{ display:flex; height:100%; }
+.cap-btn{
+  width:44px; height:36px; border:none; background:transparent; color:var(--text-2);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.cap-btn:hover{ background:color-mix(in srgb, var(--text) 8%, transparent); }
+.cap-close:hover{ background:#c42b1c; color:#fff; }
+
+.app-body{ flex:1; display:flex; min-height:0; }
+
+.nav-pane{
+  width:250px; flex:none; background:var(--mica-nav);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:10px 8px;
+  min-height:0;
+}
+.nav-platform{ display:flex; flex-direction:column; gap:2px; padding:2px 6px 10px; margin-bottom:6px; border-bottom:1px solid var(--border); }
+.nav-back{ display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:var(--accent); font-size:12px; font-weight:600; cursor:pointer; padding:4px 2px; font-family:inherit; width:fit-content; }
+.nav-back:hover{ text-decoration:underline; }
+.nav-platform-name{ font-size:12.5px; font-weight:600; color:var(--text); padding:0 2px 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nav-role{ margin:0 4px 10px; }
+.role-lbl{ display:block; padding:0 2px 5px; font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:.4px; }
+.role-toggle{ display:flex; gap:2px; background:var(--card-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:2px; }
+.role-btn{ flex:1; border:none; background:transparent; padding:6px 4px; font-size:11.5px; font-weight:600; border-radius:calc(var(--radius-sm) - 2px); cursor:pointer; color:var(--text-2); font-family:inherit; }
+.role-btn:hover{ color:var(--text); }
+.role-btn.active{ background:var(--accent); color:var(--accent-text-on); }
+.nav-search-wrap{ position:relative; margin:2px 4px 10px; }
+.nav-search{
+  display:flex; align-items:center; gap:8px; background:var(--card);
+  border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 10px; color:var(--text-3);
+}
+.nav-search input{ border:none; outline:none; background:transparent; color:var(--text); font-size:13px; width:100%; font-family:inherit; }
+.nav-search-results{
+  position:absolute; left:0; right:0; top:calc(100% + 4px); background:var(--card);
+  border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:var(--shadow-lg);
+  display:none; max-height:280px; overflow:auto; z-index:40;
+}
+.nav-search-results.open{ display:block; }
+
+.nav-list{ display:flex; flex-direction:column; gap:2px; }
+.nav-item{
+  display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:var(--radius-sm);
+  border:none; background:transparent; color:var(--text-2); font-size:13px; text-align:left; cursor:pointer;
+  position:relative; font-family:inherit;
+}
+.nav-item span{ flex:1; }
+.nav-item:hover{ background:color-mix(in srgb, var(--text) 6%, transparent); color:var(--text); }
+.nav-item.active{ background:var(--accent-soft); color:var(--text); font-weight:600; }
+.nav-item.active::before{ content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:3px; background:var(--accent); }
+.nav-sep{ height:1px; background:var(--border); margin:8px 6px; }
+.nav-list-foot{ margin-bottom:4px; }
+.nav-user{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:10px 8px 4px; border-top:1px solid var(--border); }
+.avatar{ width:30px; height:30px; border-radius:50%; background:var(--accent); color:var(--accent-text-on); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:none; }
+.nav-user-txt{ display:flex; flex-direction:column; line-height:1.3; font-size:12.5px; flex:1; min-width:0; }
+.nav-user-txt span:first-child{ font-weight:600; }
+.nav-user-txt span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.micro{ font-size:11px; color:var(--text-3); }
+.notif-wrap{ position:relative; }
+.icon-btn{ width:32px; height:32px; border-radius:var(--radius-sm); border:none; background:transparent; color:var(--text-2); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+.icon-btn:hover{ background:color-mix(in srgb, var(--text) 8%, transparent); }
+.notif-dot{ position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--critical); display:none; }
+.notif-panel{ position:absolute; bottom:calc(100% + 8px); left:-8px; width:300px; max-width:calc(100vw - 32px); background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-lg); display:none; z-index:50; overflow:hidden; }
+.notif-panel.open{ display:block; }
+.notif-panel-head{ padding:11px 14px; font-weight:600; font-size:13px; border-bottom:1px solid var(--border); }
+.notif-list{ max-height:280px; overflow:auto; padding:6px; }
+.notif-row{ display:flex; gap:9px; align-items:flex-start; padding:8px; border-radius:var(--radius-sm); font-size:12.5px; }
+.notif-row:hover{ background:color-mix(in srgb, var(--text) 5%, transparent); }
+
+.content{ flex:1; overflow-y:auto; padding:22px 26px 40px; min-width:0; }
+.csec{ display:none; }
+.csec.active{ display:block; }
+
+.page-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+.page-head h1{ font-family:'Segoe UI Variable Display','Segoe UI',system-ui,sans-serif; font-size:24px; font-weight:600; margin:0 0 3px; letter-spacing:-.2px; }
+.page-sub{ margin:0; color:var(--text-2); font-size:13px; max-width:60ch; }
+
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:16px; }
+.card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+.kpi{ display:flex; flex-direction:column; gap:5px; cursor:pointer; }
+.kpi:hover{ border-color:var(--border-strong); }
+.kpi:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.kpi-lbl{ font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; }
+.kpi-num{ font-family:'Segoe UI Variable Display','Segoe UI',system-ui,sans-serif; font-size:26px; font-weight:600; line-height:1.1; font-variant-numeric:tabular-nums; }
+.kpi-unit{ font-size:12px; font-weight:500; color:var(--text-2); margin-left:4px; }
+
+.pill{ display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; padding:2.5px 9px; border-radius:100px; width:fit-content; white-space:nowrap; }
+.pill-success{ background:var(--success-bg); color:var(--success); }
+.pill-warning{ background:var(--warning-bg); color:var(--warning); }
+.pill-critical{ background:var(--critical-bg); color:var(--critical); }
+.pill-info{ background:var(--info-bg); color:var(--info-text); }
+.pill-neutral{ background:var(--neutral-bg); color:var(--neutral-text); }
+
+.section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; flex-wrap:wrap; }
+.section-head.sub{ margin-top:18px; }
+.section-head h2{ font-size:14.5px; font-weight:600; margin:0; display:flex; align-items:center; gap:7px; }
+.section-head h3{ font-size:13.5px; font-weight:600; margin:0; }
+.link{ color:var(--accent); font-size:12.5px; cursor:pointer; font-weight:600; }
+.link:hover{ text-decoration:underline; }
+
+.dash-cols{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+@media (max-width:900px){ .dash-cols{ grid-template-columns:1fr; } }
+
+.row-item{ display:flex; align-items:center; gap:12px; padding:9px 8px; border-radius:var(--radius-sm); cursor:pointer; }
+.row-item:hover{ background:color-mix(in srgb, var(--text) 5%, transparent); }
+.row-main{ display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; font-size:13px; }
+.row-sub{ font-size:11.5px; color:var(--text-3); }
+.row-side{ display:flex; align-items:center; gap:8px; }
+.chevr{ color:var(--text-3); }
+.hint-text{ color:var(--text-3); font-size:12.5px; margin:6px 0; }
+.hint-text.pad{ padding:16px; text-align:center; }
+
+.chip-row{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--card); color:var(--text-2); font-size:12px; padding:5px 12px; border-radius:100px; cursor:pointer; font-family:inherit; }
+.chip:hover{ border-color:var(--border-strong); color:var(--text); }
+.chip-active{ background:var(--accent); border-color:var(--accent); color:var(--accent-text-on); font-weight:600; }
+
+.master-detail{ display:grid; grid-template-columns:340px 1fr; gap:14px; align-items:start; }
+@media (max-width:880px){ .master-detail{ grid-template-columns:1fr; } }
+.list-panel{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; max-height:640px; }
+.list-panel-search{ display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text-3); }
+.list-panel-search input{ border:none; outline:none; background:transparent; font-size:13px; width:100%; color:var(--text); font-family:inherit; }
+.list-items{ overflow-y:auto; padding:6px; }
+.list-item{ display:block; width:100%; text-align:left; border:none; background:transparent; border-radius:var(--radius-sm); padding:9px 10px; cursor:pointer; margin-bottom:1px; font-family:inherit; border-left:3px solid transparent; }
+.list-item:hover{ background:color-mix(in srgb, var(--text) 5%, transparent); }
+.list-item.selected{ background:var(--accent-soft); border-left-color:var(--accent); }
+.list-item-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
+.list-item-sub{ font-size:11.5px; color:var(--text-3); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+.detail-panel{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; min-height:400px; }
+.detail-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; padding:60px 20px; color:var(--text-3); }
+.detail-empty h3{ margin:6px 0 0; font-size:14px; color:var(--text-2); }
+.detail-empty p{ margin:0; font-size:12.5px; max-width:32ch; }
+.detail-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.detail-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--text-3); margin-bottom:2px; }
+.detail-head h2{ margin:0; font-size:19px; font-weight:600; }
+.detail-sub{ font-size:12.5px; color:var(--text-2); margin-top:3px; }
+.fact-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px 20px; }
+.fact{ display:flex; flex-direction:column; gap:2px; }
+.fact-lbl{ font-size:11px; color:var(--text-3); }
+.fact-val{ font-size:13px; }
+.detail-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.table-card{ padding:0; overflow-x:auto; }
+.fluent-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:420px; }
+.fluent-table thead th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-3); padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; }
+.fluent-table tbody td{ padding:11px 16px; border-bottom:1px solid var(--border); }
+.fluent-table tbody tr:last-child td{ border-bottom:none; }
+.fluent-table tbody tr:hover{ background:color-mix(in srgb, var(--text) 4%, transparent); }
+
+.btn{ display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; padding:8px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; white-space:nowrap; }
+.btn:hover{ background:color-mix(in srgb, var(--text) 5%, transparent); }
+.btn.sm{ padding:6px 12px; font-size:12px; }
+.btn-accent{ background:var(--accent); border-color:var(--accent); color:var(--accent-text-on); }
+.btn-accent:hover{ background:var(--accent-hover); border-color:var(--accent-hover); }
+.btn-subtle{ background:transparent; border-color:var(--border); }
+
+.modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.38); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
+.modal-overlay.open{ display:flex; }
+.modal{ background:var(--card); border-radius:var(--radius); width:440px; max-width:100%; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow-lg); border:1px solid var(--border); }
+
+.field{ display:flex; flex-direction:column; gap:5px; flex:1; margin-bottom:12px; }
+.field-lbl{ font-size:12.5px; font-weight:600; color:var(--text-2); }
+.field-lbl.required::after{ content:' *'; color:var(--critical); }
+.input{ border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:8px 11px; font-size:13.5px; background:var(--card-2); color:var(--text); outline:none; font-family:inherit; width:100%; }
+.input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.field-error{ display:none; color:var(--critical); font-size:11.5px; }
+.field-help{ font-size:11.5px; color:var(--text-3); }
+.field.field-invalid .input{ border-color:var(--critical); }
+.field.field-invalid .field-error{ display:block; }
+.field.field-invalid .field-help{ display:none; }
+
+.toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,16px); background:var(--text); color:var(--mica); padding:11px 18px; border-radius:var(--radius-sm); display:flex; align-items:center; gap:9px; font-size:13px; box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:200; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+.toast svg{ color:var(--success); }
+
+/* ---- trading floor ---- */
+.gate-mini{ display:flex; align-items:center; gap:7px; color:var(--text-2); font-size:12.5px; background:var(--card); border:1px solid var(--border); border-radius:100px; padding:7px 14px; }
+.gate-box{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--card-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; flex-wrap:wrap; }
+.gate-lbl{ display:block; font-size:11.5px; color:var(--text-3); }
+.gate-date{ display:block; font-size:13px; font-weight:600; margin-top:2px; }
+.gate-count{ font-size:22px; font-weight:700; color:var(--accent); }
+.dayline-wrap{ margin-top:4px; }
+.dayline{ width:100%; height:auto; display:block; }
+
+.hour-strip{ display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:14px; }
+.hour-btn{ flex:none; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); cursor:pointer; font-family:inherit; font-size:12px; }
+.hour-btn:hover{ border-color:var(--border-strong); }
+.hour-btn.active{ background:var(--accent-soft); border-color:var(--accent); color:var(--text); font-weight:600; }
+.hour-price{ font-size:11px; color:var(--text-3); }
+.hour-btn.active .hour-price{ color:var(--accent); }
+
+.trade-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:14px; align-items:start; }
+@media (max-width:980px){ .trade-grid{ grid-template-columns:1fr; } }
+.ob-cols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.ob-col-head{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:6px 8px; border-radius:var(--radius-sm); margin-bottom:6px; text-align:center; }
+.ob-buy{ background:var(--success-bg); color:var(--buy); }
+.ob-sell{ background:var(--critical-bg); color:var(--sell); }
+.ob-table{ display:flex; flex-direction:column; gap:2px; }
+.ob-row{ display:grid; grid-template-columns:1fr 1fr 22px; align-items:center; gap:6px; padding:6px 8px; border-radius:var(--radius-sm); font-size:12.5px; }
+.ob-row:nth-child(odd){ background:color-mix(in srgb, var(--text) 3%, transparent); }
+.ob-vol{ text-align:right; color:var(--text-2); }
+.ob-mine{ outline:1.5px solid var(--accent); background:var(--accent-soft) !important; }
+.ob-cancel{ border:none; background:transparent; color:var(--text-3); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.ob-cancel:hover{ color:var(--critical); }
+
+.limit-box{ margin-bottom:14px; }
+.limit-track{ height:8px; border-radius:5px; background:var(--neutral-bg); overflow:hidden; margin:6px 0 4px; }
+.limit-fill{ height:100%; background:var(--accent); border-radius:5px; }
+.side-toggle{ display:flex; gap:6px; margin-bottom:12px; }
+.side-btn{ flex:1; padding:9px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--card-2); color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:13px; }
+.side-btn.side-buy.active{ background:var(--success-bg); border-color:var(--buy); color:var(--buy); }
+.side-btn.side-sell.active{ background:var(--critical-bg); border-color:var(--sell); color:var(--sell); }
+
+/* ---- quotations ---- */
+.quote-card{ margin-bottom:14px; }
+.quote-tabs{ display:flex; gap:4px; }
+.qtab{ border:1px solid var(--border); background:var(--card-2); color:var(--text-2); font-size:11.5px; padding:4px 11px; border-radius:100px; cursor:pointer; font-family:inherit; }
+.qtab.active{ background:var(--accent); border-color:var(--accent); color:var(--accent-text-on); font-weight:600; }
+.quote-price-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+.quote-price{ font-size:20px; font-weight:700; }
+.quote-unit{ font-size:12px; font-weight:500; color:var(--text-2); }
+.candle-svg{ height:170px; }
+.indicator-block{ margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+.indicator-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.indicator-name{ font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; }
+.indicator-block .dayline{ height:64px; }
+
+/* ---- calendar ---- */
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+.cal-dow{ text-align:center; font-size:11px; color:var(--text-3); text-transform:uppercase; padding-bottom:4px; }
+.cal-cell{ position:relative; aspect-ratio:1/0.8; border:1px solid var(--border); background:var(--card-2); border-radius:var(--radius-sm); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-family:inherit; color:var(--text); }
+.cal-cell:hover{ border-color:var(--border-strong); }
+.cal-empty{ background:transparent; border:none; cursor:default; }
+.cal-daynum{ font-size:13px; font-weight:600; }
+.cal-dots{ display:flex; gap:2px; }
+.cal-dots i{ width:5px; height:5px; border-radius:50%; background:var(--accent); display:block; }
+.cal-today{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft) inset; }
+.cal-selected{ background:var(--accent-soft); border-color:var(--accent); }
+
+/* ---- reports ---- */
+.hbar-row{ margin-bottom:12px; }
+.hbar-top{ display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px; }
+.hbar-track{ height:9px; border-radius:5px; background:var(--neutral-bg); overflow:hidden; }
+.hbar-fill{ height:100%; background:var(--accent); border-radius:5px; }
+.seg-bar{ display:flex; height:16px; border-radius:8px; overflow:hidden; margin-bottom:12px; }
+.seg-legend{ display:flex; flex-wrap:wrap; gap:12px; }
+.seg-legend-item{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-2); }
+.seg-legend-item i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+
+/* ---- hub ---- */
+.hub{ margin-bottom:24px; }
+.hub-intro{
+  max-width:960px; margin:0 auto 20px; background:var(--card); border:1px solid var(--border); border-left:4px solid var(--accent);
+  border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow);
+}
+.hub-intro p{ margin:0; font-size:15px; line-height:1.6; color:var(--text); }
+.hub-intro strong{ color:var(--accent); }
+.hub-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; max-width:960px; margin:0 auto; }
+.hub-card{
+  position:relative; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px 44px;
+  cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s, transform .15s;
+}
+.hub-card:hover{ border-color:var(--accent); transform:translateY(-2px); }
+.hub-card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.hub-card-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.hub-code{ display:flex; align-items:center; gap:8px; font-size:18px; font-weight:700; color:var(--text); }
+.hub-code svg{ color:var(--accent); }
+.hub-eng{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.6px; color:var(--accent); margin-bottom:4px; }
+.hub-title{ margin:2px 0 6px; font-size:14.5px; font-weight:600; }
+.hub-desc{ margin:0; font-size:12.5px; color:var(--text-2); line-height:1.5; }
+.hub-arrow{ position:absolute; right:18px; bottom:16px; color:var(--accent); }
+
+/* ---- lots ---- */
+.lots-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+.lot-card{ display:flex; flex-direction:column; gap:10px; }
+
+::-webkit-scrollbar{ width:11px; height:11px; }
+::-webkit-scrollbar-thumb{ background:color-mix(in srgb, var(--text) 22%, transparent); border-radius:8px; border:3px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-track{ background:transparent; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:.001s !important; transition-duration:.001s !important; } }
+</style>

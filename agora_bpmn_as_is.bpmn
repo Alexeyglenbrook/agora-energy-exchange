@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_AsIs" targetNamespace="http://agora.example/bpmn" exporter="Camunda Modeler" exporterVersion="5.48.0">
+  <bpmn:collaboration id="Collaboration_AsIs">
+    <bpmn:participant id="Participant_AsIs" name="Акредитація учасника — AS-IS" processRef="Process_AsIs" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_AsIs" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_AsIs">
+      <bpmn:lane id="Lane_CCP" name="УКД (клірингова палата)">
+        <bpmn:flowNodeRef>Task_SignClearing</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Committee" name="Біржовий комітет">
+        <bpmn:flowNodeRef>Gateway_CommitteeDecision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Rejected</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AML" name="Фінансовий моніторинг">
+        <bpmn:flowNodeRef>Task_CheckAML</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Legal" name="Юридичний відділ">
+        <bpmn:flowNodeRef>Task_CheckLegal</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Accreditation" name="Відділ акредитації">
+        <bpmn:flowNodeRef>Gateway_PackageComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ActivateAccess</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Active</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ForwardPackage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CheckCompleteness</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Applicant" name="Заявник (трейдер)">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SubmitForm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SignLease</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_GetKepTraining</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Старт">
+      <bpmn:outgoing>SF1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_SubmitForm" name="Подати анкету поштою">
+      <bpmn:incoming>SF1</bpmn:incoming>
+      <bpmn:incoming>SF4</bpmn:incoming>
+      <bpmn:outgoing>SF2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_PackageComplete" name="Повний пакет?">
+      <bpmn:incoming>Flow_1935hw2</bpmn:incoming>
+      <bpmn:outgoing>SF4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1vy0kdg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_CheckLegal" name="Перевірити правовий статус">
+      <bpmn:incoming>SF6</bpmn:incoming>
+      <bpmn:outgoing>SF8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_CheckAML" name="AML / санкційна перевірка">
+      <bpmn:incoming>SF7</bpmn:incoming>
+      <bpmn:outgoing>SF9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_CommitteeDecision" name="Рішення комітету (до 10 робочих днів)">
+      <bpmn:incoming>SF8</bpmn:incoming>
+      <bpmn:incoming>SF9</bpmn:incoming>
+      <bpmn:outgoing>SF10</bpmn:outgoing>
+      <bpmn:outgoing>SF11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent_Rejected" name="Відмова (поштою)">
+      <bpmn:incoming>SF10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_SignLease" name="Підписати договір оренди біржового місця (скан)">
+      <bpmn:incoming>SF11</bpmn:incoming>
+      <bpmn:outgoing>SF12</bpmn:outgoing>
+      <bpmn:outgoing>SF13</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_SignClearing" name="Підписати клірингове членство (окремий процес, поштою)">
+      <bpmn:incoming>SF12</bpmn:incoming>
+      <bpmn:outgoing>SF14</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_GetKepTraining" name="Отримати КЕП, пройти навчання">
+      <bpmn:incoming>SF13</bpmn:incoming>
+      <bpmn:outgoing>SF15</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_ActivateAccess" name="Вручну активувати доступ у БЕТС">
+      <bpmn:incoming>SF14</bpmn:incoming>
+      <bpmn:incoming>SF15</bpmn:incoming>
+      <bpmn:outgoing>SF16</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_Active" name="Активний учасник">
+      <bpmn:incoming>SF16</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_ForwardPackage" name="Переслати пакет юр. відділу та фінмоніторингу">
+      <bpmn:incoming>Flow_1vy0kdg</bpmn:incoming>
+      <bpmn:outgoing>SF6</bpmn:outgoing>
+      <bpmn:outgoing>SF7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_CheckCompleteness" name="Перевірити комплектність">
+      <bpmn:incoming>SF2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1935hw2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="SF1" sourceRef="StartEvent_1" targetRef="Task_SubmitForm" />
+    <bpmn:sequenceFlow id="SF4" name="ні — повернути на донабір" sourceRef="Gateway_PackageComplete" targetRef="Task_SubmitForm" />
+    <bpmn:sequenceFlow id="SF2" sourceRef="Task_SubmitForm" targetRef="Task_CheckCompleteness" />
+    <bpmn:sequenceFlow id="Flow_1935hw2" sourceRef="Task_CheckCompleteness" targetRef="Gateway_PackageComplete" />
+    <bpmn:sequenceFlow id="Flow_1vy0kdg" sourceRef="Gateway_PackageComplete" targetRef="Task_ForwardPackage" />
+    <bpmn:sequenceFlow id="SF6" sourceRef="Task_ForwardPackage" targetRef="Task_CheckLegal" />
+    <bpmn:sequenceFlow id="SF8" sourceRef="Task_CheckLegal" targetRef="Gateway_CommitteeDecision" />
+    <bpmn:sequenceFlow id="SF7" sourceRef="Task_ForwardPackage" targetRef="Task_CheckAML" />
+    <bpmn:sequenceFlow id="SF9" sourceRef="Task_CheckAML" targetRef="Gateway_CommitteeDecision" />
+    <bpmn:sequenceFlow id="SF10" name="відхилено" sourceRef="Gateway_CommitteeDecision" targetRef="EndEvent_Rejected" />
+    <bpmn:sequenceFlow id="SF11" name="затверджено" sourceRef="Gateway_CommitteeDecision" targetRef="Task_SignLease" />
+    <bpmn:sequenceFlow id="SF12" sourceRef="Task_SignLease" targetRef="Task_SignClearing" />
+    <bpmn:sequenceFlow id="SF13" sourceRef="Task_SignLease" targetRef="Task_GetKepTraining" />
+    <bpmn:sequenceFlow id="SF14" sourceRef="Task_SignClearing" targetRef="Task_ActivateAccess" />
+    <bpmn:sequenceFlow id="SF15" sourceRef="Task_GetKepTraining" targetRef="Task_ActivateAccess" />
+    <bpmn:sequenceFlow id="SF16" sourceRef="Task_ActivateAccess" targetRef="EndEvent_Active" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AsIs">
+    <bpmndi:BPMNPlane id="BPMNPlane_AsIs" bpmnElement="Collaboration_AsIs">
+      <bpmndi:BPMNShape id="Participant_AsIs_di" bpmnElement="Participant_AsIs" isHorizontal="true">
+        <dc:Bounds x="160" y="40" width="2020" height="880" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_CCP_di" bpmnElement="Lane_CCP" isHorizontal="true">
+        <dc:Bounds x="190" y="790" width="1990" height="130" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Committee_di" bpmnElement="Lane_Committee" isHorizontal="true">
+        <dc:Bounds x="190" y="620" width="1990" height="170" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_AML_di" bpmnElement="Lane_AML" isHorizontal="true">
+        <dc:Bounds x="190" y="490" width="1990" height="130" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Legal_di" bpmnElement="Lane_Legal" isHorizontal="true">
+        <dc:Bounds x="190" y="360" width="1990" height="130" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Accreditation_di" bpmnElement="Lane_Accreditation" isHorizontal="true">
+        <dc:Bounds x="190" y="190" width="1990" height="170" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Applicant_di" bpmnElement="Lane_Applicant" isHorizontal="true">
+        <dc:Bounds x="190" y="40" width="1990" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="300" y="97" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="303" y="133" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SubmitForm_di" bpmnElement="Task_SubmitForm">
+        <dc:Bounds x="400" y="75" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PackageComplete_di" bpmnElement="Gateway_PackageComplete" isMarkerVisible="true">
+        <dc:Bounds x="840" y="255" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="827" y="305" width="76" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckLegal_di" bpmnElement="Task_CheckLegal">
+        <dc:Bounds x="1170" y="385" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckAML_di" bpmnElement="Task_CheckAML">
+        <dc:Bounds x="1170" y="515" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_CommitteeDecision_di" bpmnElement="Gateway_CommitteeDecision" isMarkerVisible="true">
+        <dc:Bounds x="1420" y="680" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1401" y="730" width="89" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1570" y="687" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1564" y="723" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SignLease_di" bpmnElement="Task_SignLease">
+        <dc:Bounds x="1720" y="75" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SignClearing_di" bpmnElement="Task_SignClearing">
+        <dc:Bounds x="1720" y="815" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_GetKepTraining_di" bpmnElement="Task_GetKepTraining">
+        <dc:Bounds x="1920" y="75" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ActivateAccess_di" bpmnElement="Task_ActivateAccess">
+        <dc:Bounds x="1920" y="235" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Active_di" bpmnElement="EndEvent_Active">
+        <dc:Bounds x="2120" y="257" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2114" y="293" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ForwardPackage_di" bpmnElement="Task_ForwardPackage">
+        <dc:Bounds x="980" y="240" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckCompleteness_di" bpmnElement="Task_CheckCompleteness">
+        <dc:Bounds x="620" y="240" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SF1_di" bpmnElement="SF1">
+        <di:waypoint x="336" y="115" />
+        <di:waypoint x="400" y="115" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF2_di" bpmnElement="SF2">
+        <di:waypoint x="470" y="155" />
+        <di:waypoint x="470" y="280" />
+        <di:waypoint x="620" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF4_di" bpmnElement="SF4">
+        <di:waypoint x="865" y="255" />
+        <di:waypoint x="865" y="115" />
+        <di:waypoint x="540" y="115" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="670" y="126" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF6_di" bpmnElement="SF6">
+        <di:waypoint x="1120" y="280" />
+        <di:waypoint x="1240" y="280" />
+        <di:waypoint x="1240" y="385" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF7_di" bpmnElement="SF7">
+        <di:waypoint x="1090" y="320" />
+        <di:waypoint x="1090" y="555" />
+        <di:waypoint x="1170" y="555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF8_di" bpmnElement="SF8">
+        <di:waypoint x="1310" y="425" />
+        <di:waypoint x="1445" y="425" />
+        <di:waypoint x="1445" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF9_di" bpmnElement="SF9">
+        <di:waypoint x="1310" y="555" />
+        <di:waypoint x="1430" y="555" />
+        <di:waypoint x="1430" y="695" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF10_di" bpmnElement="SF10">
+        <di:waypoint x="1470" y="705" />
+        <di:waypoint x="1570" y="705" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1494" y="680" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF11_di" bpmnElement="SF11">
+        <di:waypoint x="1460" y="695" />
+        <di:waypoint x="1460" y="115" />
+        <di:waypoint x="1720" y="115" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1442" y="395" width="66" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF12_di" bpmnElement="SF12">
+        <di:waypoint x="1790" y="155" />
+        <di:waypoint x="1790" y="815" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF13_di" bpmnElement="SF13">
+        <di:waypoint x="1860" y="115" />
+        <di:waypoint x="1920" y="115" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF14_di" bpmnElement="SF14">
+        <di:waypoint x="1860" y="855" />
+        <di:waypoint x="1990" y="855" />
+        <di:waypoint x="1990" y="315" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF15_di" bpmnElement="SF15">
+        <di:waypoint x="1990" y="155" />
+        <di:waypoint x="1990" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF16_di" bpmnElement="SF16">
+        <di:waypoint x="2060" y="275" />
+        <di:waypoint x="2120" y="275" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vy0kdg_di" bpmnElement="Flow_1vy0kdg">
+        <di:waypoint x="890" y="280" />
+        <di:waypoint x="980" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1935hw2_di" bpmnElement="Flow_1935hw2">
+        <di:waypoint x="760" y="280" />
+        <di:waypoint x="840" y="280" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
