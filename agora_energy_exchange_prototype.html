@@ -32,6 +32,8 @@
 <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-gavel" viewBox="0 0 24 24"><path d="m9.5 6.5 5 5M5 14l4.5-4.5 3 3L8 17H5v-3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 3.5 20.5 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.5 20.5h9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-news" viewBox="0 0 24 24"><rect x="3.5" y="5" width="14" height="15" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M17.5 8.5h2.2a.8.8 0 0 1 .8.8v9a1.7 1.7 0 0 1-1.7 1.7H6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.7 8.3h6.8M6.7 11.3h6.8M6.7 14.3h4.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v11.5M7.5 11l4.5 4.5L16.5 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs>
 </svg>
 
@@ -77,6 +79,7 @@
         </div>
         <div class="nav-list">
           <button class="nav-item active" data-sec="dashboard" onclick="showSection('dashboard')"><svg class="ic"><use href="#i-grid"/></svg><span>Огляд</span></button>
+          <button class="nav-item" data-sec="news" onclick="showSection('news')"><svg class="ic"><use href="#i-news"/></svg><span>Новини</span></button>
           <button class="nav-item" data-sec="trading" onclick="showSection('trading')"><svg class="ic"><use href="#i-swap"/></svg><span>Торги</span></button>
           <button class="nav-item" data-sec="quotes" onclick="showSection('quotes')"><svg class="ic"><use href="#i-chart"/></svg><span>Котирування</span></button>
           <button class="nav-item" data-sec="calendar" onclick="showSection('calendar')"><svg class="ic"><use href="#i-calendar"/></svg><span>Календар торгів</span></button>
@@ -127,6 +130,15 @@
               <div id="dashPending"></div>
             </div>
           </div>
+        </section>
+
+        <!-- НОВИНИ -->
+        <section class="csec" data-sec="news">
+          <div class="page-head">
+            <div><h1>Новини ринку</h1><p class="page-sub">Регуляторні зміни, форс-мажори та ринкові події — без затримки</p></div>
+          </div>
+          <div class="chip-row" id="newsFilters"></div>
+          <div id="newsList" class="news-list"></div>
         </section>
 
         <!-- ТОРГИ -->
@@ -225,6 +237,7 @@
         <section class="csec" data-sec="participants">
           <div class="page-head">
             <div><h1>Учасники ринку</h1><p class="page-sub">Реєстр акредитованих компаній, заявок на акредитацію та лімітів</p></div>
+            <button class="btn btn-subtle" onclick="exportParticipantsCSV()"><svg class="ic sm"><use href="#i-download"/></svg>Експортувати CSV</button>
           </div>
           <div class="chip-row" id="partFilters"></div>
           <div class="master-detail">
@@ -264,6 +277,7 @@
           </div>
           <div class="kpi-grid" id="remitKpi"></div>
           <div class="card table-card">
+            <div class="table-toolbar"><button class="btn sm btn-subtle" onclick="exportRemitCSV()"><svg class="ic sm"><use href="#i-download"/></svg>Експортувати CSV</button></div>
             <table class="fluent-table"><thead><tr><th>Звіт</th><th>Період</th><th>Термін подання</th><th>Статус</th><th></th></tr></thead><tbody id="remitRows"></tbody></table>
           </div>
         </section>
@@ -380,6 +394,7 @@ function applyPlatformNav(){
   const isStaff = currentRole==='staff';
   const visible = {
     dashboard: true,
+    news: true,
     trading: isTrader && !!p.hasTrading,
     quotes: isTrader && p.categories.length>0,
     calendar: isTrader && !!p.hasTrading,
@@ -417,6 +432,58 @@ const CATEGORIES = [
   ]},
 ];
 let activeCat = 'electricity';
+
+// ---------- news ----------
+const NEWS_TAGS = {
+  urgent: ['pill-critical','Терміново'],
+  regulator: ['pill-warning','Регулятор'],
+  remit: ['pill-info','REMIT'],
+  market: ['pill-neutral','Ринок'],
+  company: ['pill-success','Учасники'],
+};
+const NEWS_ITEMS = [
+  { id:'nw1', time:'08.08.2026 09:14', tag:'urgent', title:'Аварійне відключення ЛЕП 330 кВ на Південно-Західній ОЕС', body:'Укренерго повідомляє про тимчасове обмеження перетоків. Можливі коливання цін у вечірніх годинних блоках РДН.' },
+  { id:'nw2', time:'08.08.2026 08:40', tag:'market', title:'Базове навантаження зросло на 0,9% на відкритті сесії', body:'Зростання пов’язане з прогнозованим похолоданням та збільшенням попиту в промисловому сегменті.' },
+  { id:'nw3', time:'07.08.2026 17:05', tag:'regulator', title:'НКРЕКП затвердила нові граничні коефіцієнти для аукціонів РДН', body:'Зміни набирають чинності з наступного торгового тижня, деталі — у розділі «Документи».' },
+  { id:'nw4', time:'07.08.2026 14:22', tag:'remit', title:'Термін подання звіту про позабіржові угоди перенесено', body:'Оновлений дедлайн для звіту OTC за липень — 12 серпня. Перевірте статус подання у розділі «Звіти (REMIT)».' },
+  { id:'nw5', time:'07.08.2026 11:50', tag:'company', title:'Ще 2 компанії подали заявки на акредитацію цього тижня', body:'Заявки перебувають на паралельній юридичній та AML-перевірці — деталі в реєстрі учасників.' },
+  { id:'nw6', time:'06.08.2026 19:30', tag:'market', title:'Ціни на газовому ринку стабілізувались після завершення ОЗП', body:'Ресурс наступного місяця торгується у вузькому діапазоні третій день поспіль.' },
+  { id:'nw7', time:'06.08.2026 16:10', tag:'regulator', title:'Продовжено обмеження на імпорт електроенергії з суміжних ОЕС', body:'Рішення діятиме до кінця місяця; профільні учасники отримають окреме повідомлення.' },
+  { id:'nw8', time:'06.08.2026 10:05', tag:'urgent', title:'Санкційний перелік оновлено — під наглядом фінансового моніторингу', body:'Заявки від пов’язаних осіб проходитимуть додаткову AML-перевірку до підтвердження статусу.' },
+  { id:'nw9', time:'05.08.2026 15:45', tag:'market', title:'Прогноз похолодання: очікується зростання попиту на 8% наступного тижня', body:'Метеорологічний фактор може вплинути на індикативні ціни блоку 07:00–23:00.' },
+  { id:'nw10', time:'05.08.2026 09:12', tag:'company', title:'ТОВ «Дніпро Пауер Трейд» пройшло планову перевірку ліміту', body:'Ліміт участі підтверджено без змін за результатами щоквартального перегляду фінмоніторингом.' },
+];
+let activeNewsFilter = 'all';
+function renderNews(){
+  const filters = ['all','urgent','regulator','remit','market','company'];
+  const labels = { all:'Усі', urgent:'Термінові', regulator:'Регулятор', remit:'REMIT', market:'Ринок', company:'Учасники' };
+  document.getElementById('newsFilters').innerHTML = filters.map(f=>
+    `<button class="chip ${activeNewsFilter===f?'chip-active':''}" onclick="setNewsFilter('${f}')">${labels[f]}</button>`).join('');
+  const list = activeNewsFilter==='all' ? NEWS_ITEMS : NEWS_ITEMS.filter(n=>n.tag===activeNewsFilter);
+  document.getElementById('newsList').innerHTML = list.length ? list.map(n=>{
+    const tag = NEWS_TAGS[n.tag];
+    return `<div class="card news-item">
+      <div class="news-item-head"><span class="pill ${tag[0]}">${tag[1]}</span><span class="micro mono">${n.time}</span></div>
+      <h3 class="news-item-title">${n.title}</h3>
+      <p class="news-item-body">${n.body}</p>
+    </div>`;
+  }).join('') : `<p class="hint-text pad">Новин за цим фільтром немає.</p>`;
+}
+function setNewsFilter(f){ activeNewsFilter = f; renderNews(); }
+
+// ---------- CSV export ----------
+function downloadCSV(filename, headers, rows){
+  const esc = v => `"${String(v==null?'':v).replace(/"/g,'""')}"`;
+  const lines = [headers.map(esc).join(',')].concat(rows.map(r=>r.map(esc).join(',')));
+  const csv = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Файл ' + filename + ' завантажено');
+}
 
 // ---------- participants ----------
 const participants = [
@@ -543,6 +610,7 @@ function showSection(name){
   document.querySelectorAll('.csec').forEach(s=>s.classList.toggle('active', s.dataset.sec===name));
   closeNotif();
   if(name==='dashboard') renderDashboard();
+  if(name==='news') renderNews();
   if(name==='trading') renderTrading();
   if(name==='quotes') renderQuotes();
   if(name==='calendar') renderCalendar();
@@ -1054,12 +1122,21 @@ function renderQuotes(){
         </div>
       </div>
       <div class="quote-view quote-view-table" style="display:none">
-        <div class="table-card"><table class="fluent-table"><thead><tr><th>Дата</th><th>Ціна, ${cat.unit}</th><th>Обсяг, ${cat.volUnit}</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="table-card">
+          <div class="table-toolbar"><button class="btn sm btn-subtle" onclick="exportQuoteCSV('${cat.id}','${inst.id}')"><svg class="ic sm"><use href="#i-download"/></svg>Експортувати CSV</button></div>
+          <table class="fluent-table"><thead><tr><th>Дата</th><th>Ціна, ${cat.unit}</th><th>Обсяг, ${cat.volUnit}</th></tr></thead><tbody>${rows}</tbody></table>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 function setCat(id){ activeCat = id; renderQuotes(); }
+function exportQuoteCSV(catId, instId){
+  const cat = CATEGORIES.find(c=>c.id===catId);
+  const inst = cat.instruments.find(i=>i.id===instId);
+  const rows = DATES.map((d,i)=>[d, inst.prices[i].toFixed(2), inst.vols[i]]).reverse();
+  downloadCSV(`kotyruvannya_${instId}.csv`, ['Дата', `Ціна, ${cat.unit}`, `Обсяг, ${cat.volUnit}`], rows);
+}
 function toggleQuoteView(btn, view){
   const card = btn.closest('.quote-card');
   card.querySelectorAll('.qtab').forEach(b=>b.classList.remove('active'));
@@ -1134,6 +1211,24 @@ function renderParticipantList(){
 
   if(selectedPartId && !list.find(p=>p.id===selectedPartId)){ selectedPartId=null; }
   renderParticipantDetail();
+}
+function exportParticipantsCSV(){
+  const q = (document.getElementById('partSearch').value||'').trim().toLowerCase();
+  let list = participants.filter(p=> activePartFilter==='all' || p.status===activePartFilter);
+  if(currentRole==='trader') list = list.filter(p=> p.status!=='pending' || p.id===MY_COMPANY_ID);
+  if(q) list = list.filter(p=> p.name.toLowerCase().includes(q) || p.edrpou.includes(q));
+  const statusLabels = {accredited:'Акредитовано', pending:'На розгляді', suspended:'Призупинено'};
+  const rows = list.map(p=>{
+    const canSeePrivate = currentRole==='staff' || p.id===MY_COMPANY_ID;
+    return [
+      p.name, p.edrpou, p.segment, p.city, statusLabels[p.status],
+      canSeePrivate ? p.contact : '',
+      canSeePrivate ? p.phone : '',
+      canSeePrivate ? p.limit : '',
+      canSeePrivate ? p.used : '',
+    ];
+  });
+  downloadCSV('uchasnyky_rynku.csv', ['Назва', 'ЄДРПОУ', 'Сегмент', 'Місто', 'Статус', 'Контактна особа', 'Телефон', 'Ліміт', 'Використано'], rows);
 }
 function setPartFilter(f){ activePartFilter=f; renderParticipantList(); }
 function selectParticipant(id){ selectedPartId=id; renderParticipantList(); }
@@ -1246,6 +1341,11 @@ function submitRemitReport(i){
   remitReports[i].status = 'submitted';
   toast('Звіт подано регулятору');
   renderRemit();
+}
+function exportRemitCSV(){
+  const stLabels = { submitted:'Подано', pending:'Очікує', overdue:'Прострочено' };
+  const rows = remitReports.map(r=>[r.name, r.period, r.deadline, stLabels[r.status]]);
+  downloadCSV('zvitnist_remit.csv', ['Звіт', 'Період', 'Термін подання', 'Статус'], rows);
 }
 
 // ---------- lots ----------
@@ -1595,6 +1695,7 @@ body{
 .detail-actions{ display:flex; gap:8px; flex-wrap:wrap; }
 
 .table-card{ padding:0; overflow-x:auto; }
+.table-toolbar{ display:flex; justify-content:flex-end; padding:10px 14px; border-bottom:1px solid var(--border); }
 .fluent-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:420px; }
 .fluent-table thead th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-3); padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; }
 .fluent-table tbody td{ padding:11px 16px; border-bottom:1px solid var(--border); }
@@ -1669,6 +1770,11 @@ body{
 .tape-price-sell{ color:var(--sell); }
 .tape-vol{ text-align:right; color:var(--text-2); }
 .tape-row.tape-mine{ outline:1.5px solid var(--accent); background:var(--accent-soft) !important; }
+
+.news-list{ display:flex; flex-direction:column; gap:10px; }
+.news-item-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.news-item-title{ margin:0 0 5px; font-size:14.5px; font-weight:600; line-height:1.35; }
+.news-item-body{ margin:0; font-size:13px; color:var(--text-2); line-height:1.5; }
 
 .limit-box{ margin-bottom:14px; }
 .limit-track{ height:8px; border-radius:5px; background:var(--neutral-bg); overflow:hidden; margin:6px 0 4px; }
