@@ -188,6 +188,10 @@
                 <div class="limit-track"><div class="limit-fill" id="limitFill"></div></div>
                 <span class="micro" id="limitText">—</span>
               </div>
+              <div class="trademode-toggle" id="tradeModeToggle">
+                <button class="trademode-btn active" data-mode="book" onclick="setTradeMode('book')">Біржовий стакан</button>
+                <button class="trademode-btn" data-mode="block" onclick="setTradeMode('block')">Block Trade</button>
+              </div>
               <div class="otype-toggle" id="orderTypeToggle">
                 <button class="otype-btn active" data-type="limit" onclick="setOrderType('limit')">Лімітна</button>
                 <button class="otype-btn" data-type="market" onclick="setOrderType('market')">Ринкова</button>
@@ -218,7 +222,20 @@
                 <input class="input mono" id="fOrderVisible" type="number" step="1" placeholder="Наприклад, 20">
                 <span class="field-help">Решта обсягу прихована й підтягується частинами після виконання видимої.</span>
               </label>
-              <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="submitOrder()"><svg class="ic sm"><use href="#i-plus"/></svg>Виставити заявку</button>
+              <div id="fBlockFields" style="display:none">
+                <label class="field">
+                  <span class="field-lbl required">Контрагент</span>
+                  <select class="input" id="fBlockCounterparty">
+                    <option value="">Оберіть контрагента…</option>
+                  </select>
+                  <span class="field-help">Лише акредитовані учасники ринку.</span>
+                </label>
+                <label class="field checkbox-field">
+                  <input type="checkbox" id="fBlockClearing" checked>
+                  <span>Біржа виступає гарантом (кліринг) — комісія 0.05%</span>
+                </label>
+              </div>
+              <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="submitOrder()" id="submitOrderBtn"><svg class="ic sm"><use href="#i-plus"/></svg><span id="submitOrderBtnText">Виставити заявку</span></button>
               <div class="section-head sub"><h3>Мої заявки</h3></div>
               <div id="myOrdersList"></div>
             </div>
@@ -529,6 +546,8 @@ let tradeTapes = {}; // marketKey -> [{time, price, volume, side, mine}], oldest
 let myOrders = [];
 let orderSide = 'buy';
 let orderType = 'limit'; // limit | market | stop | iceberg
+let tradeMode = 'book'; // book | block
+const BLOCK_MIN_VOLUME = 200;
 let orderSeq = 1;
 
 function marketsForPlatform(p){
@@ -848,15 +867,24 @@ function renderTrading(){
   renderMyOrders();
   renderTradeTape();
   renderTradingChart();
+  renderBlockCounterpartyOptions();
 }
 function selectMarket(key){ selectedMarket = key; renderTrading(); }
+function renderBlockCounterpartyOptions(){
+  const sel = document.getElementById('fBlockCounterparty');
+  if(!sel) return;
+  const prev = sel.value;
+  const options = participants.filter(p=>p.status==='accredited' && p.id!==MY_COMPANY_ID);
+  sel.innerHTML = '<option value="">Оберіть контрагента…</option>' + options.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  if(options.find(p=>p.id===prev)) sel.value = prev;
+}
 function renderTradeTape(){
   const m = currentMarket();
   const tape = getTape(m.key);
   const rows = tape.slice(-40).slice().reverse();
   document.getElementById('tapeRows').innerHTML = rows.length ? rows.map(t=>`
     <div class="tape-row ${t.mine?'tape-mine':''}">
-      <span class="mono micro">${t.time.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+      <span class="mono micro">${t.time.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}${t.block?' <span class="ob-ice" title="Block Trade — позабіржова угода">B</span>':''}</span>
       <span class="mono ${t.side==='buy'?'tape-price-buy':'tape-price-sell'}">${fmtMoney(t.price)}</span>
       <span class="mono tape-vol">${fmtNum(t.volume)}</span>
     </div>`).join('') : `<p class="hint-text pad">Угод ще не було.</p>`;
@@ -925,15 +953,35 @@ function setOrderType(type){
   document.getElementById('fOrderPriceField').style.display = type==='market' ? 'none' : '';
   updateOrderFormLabels();
 }
+function setTradeMode(mode){
+  tradeMode = mode;
+  document.querySelectorAll('.trademode-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+  const isBlock = mode==='block';
+  document.getElementById('orderTypeToggle').style.display = isBlock ? 'none' : '';
+  document.getElementById('fBlockFields').style.display = isBlock ? '' : 'none';
+  document.getElementById('submitOrderBtnText').textContent = isBlock ? 'Зареєструвати Block Trade' : 'Виставити заявку';
+  if(isBlock){
+    document.getElementById('fOrderTriggerField').style.display = 'none';
+    document.getElementById('fOrderVisibleField').style.display = 'none';
+    document.getElementById('fOrderPriceField').style.display = '';
+  } else {
+    setOrderType(orderType);
+  }
+  updateOrderFormLabels();
+}
 function updateOrderFormLabels(){
   if(!currentPlatform) return;
   const m = currentMarket();
-  document.getElementById('fOrderPriceLbl').textContent = (orderType==='stop' ? 'Ціна після спрацювання, необов’язково, ' : 'Ціна, ') + m.unit;
-  document.getElementById('fOrderVolLbl').textContent = (orderType==='iceberg' ? 'Загальний обсяг, ' : 'Обсяг, ') + m.volUnit;
+  const isBlock = tradeMode==='block';
+  document.getElementById('fOrderPriceLbl').textContent = (!isBlock && orderType==='stop' ? 'Ціна після спрацювання, необов’язково, ' : 'Ціна, ') + m.unit;
+  document.getElementById('fOrderVolLbl').textContent = (!isBlock && orderType==='iceberg' ? 'Загальний обсяг, ' : 'Обсяг, ') + m.volUnit;
+  document.getElementById('fOrderVolHelp').textContent = isBlock
+    ? `Мінімум ${fmtNum(BLOCK_MIN_VOLUME)} ${m.volUnit} для Block Trade; не може перевищувати вільний ліміт учасника.`
+    : 'Не може перевищувати вільний ліміт, показаний вище.';
 }
 function clearOrderVolError(){ document.getElementById('fOrderVolField').classList.remove('field-invalid'); }
-function recordTrade(marketKey, price, volume, side, mine){
-  getTape(marketKey).push({ time: simNow(), price, volume, side, mine });
+function recordTrade(marketKey, price, volume, side, mine, block){
+  getTape(marketKey).push({ time: simNow(), price, volume, side, mine, block: !!block });
   checkStopOrders(marketKey, price);
 }
 function replenishIceberg(sideArray, removed, isBid){
@@ -1013,7 +1061,36 @@ function executeMarketOrder(m, side, volume, id){
     ? `Ринкову заявку виконано частково: ${fmtNum(filled)} з ${fmtNum(volume)} ${m.volUnit} за ${fmtMoney(execPrice)} ${m.unit} — залишок скасовано (немає ліквідності)`
     : `Ринкову заявку виконано за ${fmtMoney(execPrice)} ${m.unit}`);
 }
+function submitBlockTrade(){
+  const m = currentMarket();
+  const price = parseFloat(document.getElementById('fOrderPrice').value);
+  const volume = parseFloat(document.getElementById('fOrderVolume').value);
+  const cpId = document.getElementById('fBlockCounterparty').value;
+  const cleared = document.getElementById('fBlockClearing').checked;
+
+  if(!price || price<=0){ toast('Вкажіть ціну Block Trade'); return; }
+  if(!volume || volume < BLOCK_MIN_VOLUME){ toast(`Обсяг Block Trade має бути не менше ${fmtNum(BLOCK_MIN_VOLUME)} ${m.volUnit}`); return; }
+  if(!cpId){ toast('Оберіть контрагента'); return; }
+  const free = freeLimitFor(MY_COMPANY_ID);
+  if(volume > free){ toast(`Обсяг перевищує вільний ліміт учасника (доступно ${fmtNum(free)} ${m.volUnit})`); return; }
+  const cp = participants.find(p=>p.id===cpId);
+  const cpFree = Math.max(0, cp.limit - cp.used);
+  if(volume > cpFree){ toast(`Контрагент «${cp.name}» не має достатнього вільного ліміту для цієї угоди (доступно ${fmtNum(cpFree)} ${m.volUnit})`); return; }
+
+  const id = 'o'+(orderSeq++);
+  cp.used += volume;
+  myOrders.unshift({ id, platformId:currentPlatform.id, marketKey:m.key, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price, volume, status:'matched', type:'block', counterparty:cp.name, cleared });
+  recordTrade(m.key, price, volume, orderSide, true, true);
+
+  const fee = price * volume * 0.0005;
+  document.getElementById('fOrderPrice').value=''; document.getElementById('fOrderVolume').value='';
+  toast(cleared
+    ? `Block Trade зареєстровано з «${cp.name}»: ${fmtMoney(price)} ${m.unit} × ${fmtNum(volume)} ${m.volUnit}. Комісія біржі за кліринг: ${fmtMoney(fee)} грн.`
+    : `Block Trade зареєстровано з «${cp.name}» без клірингової гарантії біржі — контрагенти несуть ризик самостійно.`);
+  renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
+}
 function submitOrder(){
+  if(tradeMode==='block'){ submitBlockTrade(); return; }
   const m = currentMarket();
   const priceInput = document.getElementById('fOrderPrice');
   const volInput = document.getElementById('fOrderVolume');
@@ -1106,15 +1183,16 @@ function cancelOrder(id){
 function renderMyOrders(){
   const box = document.getElementById('myOrdersList');
   if(!myOrders.length){ box.innerHTML = `<p class="hint-text pad">Заявок ще немає.</p>`; return; }
-  const typeLabels = { limit:'Лімітна', market:'Ринкова', stop:'Стоп', iceberg:'Айсберг' };
+  const typeLabels = { limit:'Лімітна', market:'Ринкова', stop:'Стоп', iceberg:'Айсберг', block:'Block Trade' };
   box.innerHTML = myOrders.map(o=>{
     const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:o.status==='waiting'?['pill-warning','Очікує тригера']:['pill-neutral','Скасовано'];
     const plat = PLATFORMS.find(p=>p.id===o.platformId);
     const platLabel = plat ? plat.badge : '';
     const typeLabel = typeLabels[o.type] || 'Лімітна';
     const priceText = (o.type==='stop' && o.status==='waiting') ? `тригер ${fmtMoney(o.triggerPrice)} ${o.unit}` : (o.price!=null ? `${fmtMoney(o.price)} ${o.unit}` : '—');
+    const blockText = o.type==='block' ? ` · контрагент: ${escapeHtml(o.counterparty)}${o.cleared?' · кліринг':' · без клірингу'}` : '';
     return `<div class="row-item">
-      <div class="row-main"><span class="mono strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${platLabel} · ${typeLabel}${o.wasStop?' зі стопа':''} · ${priceText} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
+      <div class="row-main"><span class="mono strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${platLabel} · ${typeLabel}${o.wasStop?' зі стопа':''} · ${priceText} · ${fmtNum(o.volume)} ${o.volUnit}${blockText}</span></div>
       <div class="row-side"><span class="pill ${st[0]}">${st[1]}</span>${(o.status==='active'||o.status==='waiting')?`<button class="icon-btn" onclick="cancelOrder('${o.id}')" aria-label="Скасувати"><svg class="ic sm"><use href="#i-close"/></svg></button>`:''}</div>
     </div>`;
   }).join('');
@@ -1928,6 +2006,13 @@ body{
 .side-btn{ flex:1; padding:9px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--card-2); color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:13px; }
 .side-btn.side-buy.active{ background:var(--success-bg); border-color:var(--buy); color:var(--buy); }
 .side-btn.side-sell.active{ background:var(--critical-bg); border-color:var(--sell); color:var(--sell); }
+
+.trademode-toggle{ display:flex; gap:4px; margin-bottom:12px; background:var(--card-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; }
+.trademode-btn{ flex:1; padding:8px 6px; border-radius:calc(var(--radius-sm) - 2px); border:none; background:transparent; color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:12.5px; }
+.trademode-btn:hover{ color:var(--text); }
+.trademode-btn.active{ background:var(--accent); color:var(--accent-text-on); }
+.checkbox-field{ display:flex; flex-direction:row; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); }
+.checkbox-field input{ width:15px; height:15px; flex:none; accent-color:var(--accent); }
 
 .otype-toggle{ display:flex; gap:4px; margin-bottom:12px; background:var(--card-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; }
 .otype-btn{ flex:1; padding:7px 4px; border-radius:calc(var(--radius-sm) - 2px); border:none; background:transparent; color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:11.5px; }
