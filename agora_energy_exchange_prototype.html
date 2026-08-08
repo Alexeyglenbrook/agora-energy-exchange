@@ -138,18 +138,34 @@
 
           <div class="hour-strip" id="hourStrip"></div>
 
+          <div class="card chart-card">
+            <div class="section-head">
+              <h2>Графік ціни за сесію — <span id="chHourLabel">—</span></h2>
+              <span class="pill" id="chGap">—</span>
+            </div>
+            <div class="dayline-wrap"><svg viewBox="0 0 600 100" class="dayline" id="tradingChartSvg" preserveAspectRatio="none"></svg></div>
+          </div>
+
           <div class="trade-grid">
-            <div class="card ob-card">
-              <div class="section-head"><h2>Стакан заявок — <span id="obHourLabel">—</span></h2><span class="pill pill-info" id="obClearing">—</span></div>
-              <div class="ob-cols">
-                <div class="ob-col">
-                  <div class="ob-col-head ob-buy">Купівля (bid)</div>
-                  <div class="ob-table" id="obBids"></div>
+            <div class="trade-col-left">
+              <div class="card ob-card">
+                <div class="section-head"><h2>Стакан заявок — <span id="obHourLabel">—</span></h2><span class="pill pill-info" id="obClearing">—</span></div>
+                <div class="ob-cols">
+                  <div class="ob-col">
+                    <div class="ob-col-head ob-buy">Купівля (bid)</div>
+                    <div class="ob-table" id="obBids"></div>
+                  </div>
+                  <div class="ob-col">
+                    <div class="ob-col-head ob-sell">Продаж (ask)</div>
+                    <div class="ob-table" id="obAsks"></div>
+                  </div>
                 </div>
-                <div class="ob-col">
-                  <div class="ob-col-head ob-sell">Продаж (ask)</div>
-                  <div class="ob-table" id="obAsks"></div>
-                </div>
+              </div>
+
+              <div class="card tape-card">
+                <div class="section-head"><h2>Останні угоди <span class="micro">(усі учасники)</span></h2></div>
+                <div class="tape-head"><span>Час</span><span>Ціна</span><span>Обсяг</span></div>
+                <div class="tape-table" id="tapeRows"></div>
               </div>
             </div>
 
@@ -426,6 +442,7 @@ let selectedPartId = null;
 const HOURLY_BASE = [3200,3100,3050,3000,3050,3300,4200,5200,5600,5100,4700,4300,4000,3900,4100,4500,5300,6200,6400,6000,5400,4800,4100,3500];
 let selectedMarket = null;
 let orderBooks = {}; // marketKey -> {bids:[], asks:[]}
+let tradeTapes = {}; // marketKey -> [{time, price, volume, side, mine}], oldest -> newest
 let myOrders = [];
 let orderSide = 'buy';
 let orderSeq = 1;
@@ -465,6 +482,30 @@ function genBook(marketKey){
 function getBook(marketKey){
   if(!orderBooks[marketKey]) orderBooks[marketKey] = genBook(marketKey);
   return orderBooks[marketKey];
+}
+function simNow(){ return new Date(TODAY.getTime() + (Date.now() - INIT_REAL_TIME)); }
+function genTape(marketKey){
+  const m = marketsForPlatform(currentPlatform).find(x=>x.key===marketKey);
+  const base = m.base;
+  const rnd = mulberry32(hashStr(marketKey+'_tape'));
+  const n = 24;
+  const now = simNow();
+  const trades = [];
+  let price = base;
+  for(let i=0;i<n;i++){
+    price = Math.max(price*0.2, price*(1 + (rnd()-0.5)*0.018));
+    trades.push({
+      time: new Date(now.getTime() - (n-i)*(45+rnd()*90)*1000),
+      price,
+      volume: Math.round(8 + rnd()*90),
+      side: rnd()>0.5 ? 'buy' : 'sell',
+    });
+  }
+  return trades;
+}
+function getTape(marketKey){
+  if(!tradeTapes[marketKey]) tradeTapes[marketKey] = genTape(marketKey);
+  return tradeTapes[marketKey];
 }
 function usedLimitFor(pId){
   const p = participants.find(x=>x.id===pId);
@@ -719,8 +760,41 @@ function renderTrading(){
     `<button class="hour-btn ${m.key===selectedMarket?'active':''}" onclick="selectMarket('${m.key}')">${escapeHtml(m.label)}<span class="hour-price mono">${fmtMoney(m.base)}</span></button>`).join('');
   renderOrderBook();
   renderMyOrders();
+  renderTradeTape();
+  renderTradingChart();
 }
 function selectMarket(key){ selectedMarket = key; renderTrading(); }
+function renderTradeTape(){
+  const m = currentMarket();
+  const tape = getTape(m.key);
+  const rows = tape.slice(-40).slice().reverse();
+  document.getElementById('tapeRows').innerHTML = rows.length ? rows.map(t=>`
+    <div class="tape-row ${t.mine?'tape-mine':''}">
+      <span class="mono micro">${t.time.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+      <span class="mono ${t.side==='buy'?'tape-price-buy':'tape-price-sell'}">${fmtMoney(t.price)}</span>
+      <span class="mono tape-vol">${fmtNum(t.volume)}</span>
+    </div>`).join('') : `<p class="hint-text pad">Угод ще не було.</p>`;
+}
+function renderTradingChart(){
+  const m = currentMarket();
+  const tape = getTape(m.key);
+  document.getElementById('chHourLabel').textContent = m.label;
+  const prices = tape.map(t=>t.price);
+  const svg = document.getElementById('tradingChartSvg');
+  const gapEl = document.getElementById('chGap');
+  if(prices.length < 2){
+    svg.innerHTML = '';
+    gapEl.textContent = 'Немає угод';
+    gapEl.className = 'pill pill-neutral';
+    return;
+  }
+  const pts = buildSparkline(prices, 600, 100, 10);
+  const last = prices[prices.length-1], first = prices[0];
+  const gap = pctStr(last, first), up = gap.startsWith('+');
+  svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  gapEl.innerHTML = `<svg class="ic tiny"><use href="#${up?'i-up':'i-down'}"/></svg>${fmtMoney(last)} ${m.unit} · ${gap}`;
+  gapEl.className = 'pill ' + (up?'pill-success':'pill-critical');
+}
 function renderOrderBook(){
   const m = currentMarket();
   const book = getBook(m.key);
@@ -789,9 +863,12 @@ function submitOrder(){
     }
   }
   myOrders.unshift({ id, platformId:currentPlatform.id, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price, volume, status });
+  if(status==='matched'){
+    getTape(m.key).push({ time: simNow(), price, volume, side:orderSide, mine:true });
+  }
   priceInput.value=''; volInput.value='';
   toast(status==='matched' ? `Заявку виконано за ціною ${fmtMoney(price)} ${m.unit}` : 'Заявку прийнято до стакану');
-  renderOrderBook(); renderMyOrders();
+  renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
 }
 function cancelOrder(id){
   const o = myOrders.find(x=>x.id===id);
@@ -1557,8 +1634,12 @@ body{
 .hour-price{ font-size:11px; color:var(--text-3); }
 .hour-btn.active .hour-price{ color:var(--accent); }
 
+.chart-card{ margin-bottom:14px; }
+.chart-card .dayline{ height:100px; }
+
 .trade-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:14px; align-items:start; }
 @media (max-width:980px){ .trade-grid{ grid-template-columns:1fr; } }
+.trade-col-left{ display:flex; flex-direction:column; gap:14px; }
 .ob-cols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .ob-col-head{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:6px 8px; border-radius:var(--radius-sm); margin-bottom:6px; text-align:center; }
 .ob-buy{ background:var(--success-bg); color:var(--buy); }
@@ -1570,6 +1651,15 @@ body{
 .ob-mine{ outline:1.5px solid var(--accent); background:var(--accent-soft) !important; }
 .ob-cancel{ border:none; background:transparent; color:var(--text-3); cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .ob-cancel:hover{ color:var(--critical); }
+
+.tape-head{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; padding:0 8px 6px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:var(--text-3); }
+.tape-table{ display:flex; flex-direction:column; gap:2px; max-height:260px; overflow-y:auto; }
+.tape-row{ display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; gap:6px; padding:5px 8px; border-radius:var(--radius-sm); font-size:12.5px; }
+.tape-row:nth-child(odd){ background:color-mix(in srgb, var(--text) 3%, transparent); }
+.tape-price-buy{ color:var(--buy); }
+.tape-price-sell{ color:var(--sell); }
+.tape-vol{ text-align:right; color:var(--text-2); }
+.tape-row.tape-mine{ outline:1.5px solid var(--accent); background:var(--accent-soft) !important; }
 
 .limit-box{ margin-bottom:14px; }
 .limit-track{ height:8px; border-radius:5px; background:var(--neutral-bg); overflow:hidden; margin:6px 0 4px; }
