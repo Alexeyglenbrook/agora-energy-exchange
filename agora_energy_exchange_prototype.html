@@ -143,7 +143,7 @@
               <h2>Графік ціни за сесію — <span id="chHourLabel">—</span></h2>
               <span class="pill" id="chGap">—</span>
             </div>
-            <div class="dayline-wrap"><svg viewBox="0 0 600 100" class="dayline" id="tradingChartSvg" preserveAspectRatio="none"></svg></div>
+            <div class="dayline-wrap"><svg viewBox="0 0 600 150" class="dayline candle-svg" id="tradingChartSvg" preserveAspectRatio="none"></svg></div>
           </div>
 
           <div class="trade-grid">
@@ -775,23 +775,32 @@ function renderTradeTape(){
       <span class="mono tape-vol">${fmtNum(t.volume)}</span>
     </div>`).join('') : `<p class="hint-text pad">Угод ще не було.</p>`;
 }
+function tapeToCandles(tape, bucketSize=2){
+  const candles = [];
+  for(let i=0; i<tape.length; i+=bucketSize){
+    const chunk = tape.slice(i, i+bucketSize);
+    if(!chunk.length) continue;
+    const prices = chunk.map(t=>t.price);
+    candles.push({ o: chunk[0].price, c: chunk[chunk.length-1].price, h: Math.max(...prices), l: Math.min(...prices) });
+  }
+  return candles;
+}
 function renderTradingChart(){
   const m = currentMarket();
   const tape = getTape(m.key);
   document.getElementById('chHourLabel').textContent = m.label;
-  const prices = tape.map(t=>t.price);
   const svg = document.getElementById('tradingChartSvg');
   const gapEl = document.getElementById('chGap');
-  if(prices.length < 2){
+  if(tape.length < 2){
     svg.innerHTML = '';
     gapEl.textContent = 'Немає угод';
     gapEl.className = 'pill pill-neutral';
     return;
   }
-  const pts = buildSparkline(prices, 600, 100, 10);
-  const last = prices[prices.length-1], first = prices[0];
+  const candles = tapeToCandles(tape, 2);
+  const last = tape[tape.length-1].price, first = tape[0].price;
   const gap = pctStr(last, first), up = gap.startsWith('+');
-  svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  svg.innerHTML = buildCandlestickSVG(candles, 600, 150, 12);
   gapEl.innerHTML = `<svg class="ic tiny"><use href="#${up?'i-up':'i-down'}"/></svg>${fmtMoney(last)} ${m.unit} · ${gap}`;
   gapEl.className = 'pill ' + (up?'pill-success':'pill-critical');
 }
@@ -1635,7 +1644,7 @@ body{
 .hour-btn.active .hour-price{ color:var(--accent); }
 
 .chart-card{ margin-bottom:14px; }
-.chart-card .dayline{ height:100px; }
+.chart-card .dayline{ height:150px; }
 
 .trade-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:14px; align-items:start; }
 @media (max-width:980px){ .trade-grid{ grid-template-columns:1fr; } }
