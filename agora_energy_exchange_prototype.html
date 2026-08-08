@@ -188,11 +188,22 @@
                 <div class="limit-track"><div class="limit-fill" id="limitFill"></div></div>
                 <span class="micro" id="limitText">—</span>
               </div>
+              <div class="otype-toggle" id="orderTypeToggle">
+                <button class="otype-btn active" data-type="limit" onclick="setOrderType('limit')">Лімітна</button>
+                <button class="otype-btn" data-type="market" onclick="setOrderType('market')">Ринкова</button>
+                <button class="otype-btn" data-type="stop" onclick="setOrderType('stop')">Стоп</button>
+                <button class="otype-btn" data-type="iceberg" onclick="setOrderType('iceberg')">Айсберг</button>
+              </div>
               <div class="side-toggle">
                 <button class="side-btn side-buy active" id="sideBuyBtn" onclick="setOrderSide('buy')">Купити</button>
                 <button class="side-btn side-sell" id="sideSellBtn" onclick="setOrderSide('sell')">Продати</button>
               </div>
-              <label class="field">
+              <label class="field" id="fOrderTriggerField" style="display:none">
+                <span class="field-lbl">Стоп-ціна (тригер)</span>
+                <input class="input mono" id="fOrderTrigger" type="number" step="0.01" placeholder="Наприклад, 5400.00">
+                <span class="field-help">Заявка активується, коли ціна останньої угоди досягне цього рівня.</span>
+              </label>
+              <label class="field" id="fOrderPriceField">
                 <span class="field-lbl" id="fOrderPriceLbl">Ціна</span>
                 <input class="input mono" id="fOrderPrice" type="number" step="0.01" placeholder="Наприклад, 5250.00">
               </label>
@@ -201,6 +212,11 @@
                 <input class="input mono" id="fOrderVolume" type="number" step="1" placeholder="Наприклад, 50" oninput="clearOrderVolError()">
                 <span class="field-error" id="fOrderVolError">Обсяг перевищує вільний ліміт учасника — зменшіть обсяг або скасуйте активну заявку.</span>
                 <span class="field-help" id="fOrderVolHelp">Не може перевищувати вільний ліміт, показаний вище.</span>
+              </label>
+              <label class="field" id="fOrderVisibleField" style="display:none">
+                <span class="field-lbl">Видимий обсяг у стакані</span>
+                <input class="input mono" id="fOrderVisible" type="number" step="1" placeholder="Наприклад, 20">
+                <span class="field-help">Решта обсягу прихована й підтягується частинами після виконання видимої.</span>
               </label>
               <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="submitOrder()"><svg class="ic sm"><use href="#i-plus"/></svg>Виставити заявку</button>
               <div class="section-head sub"><h3>Мої заявки</h3></div>
@@ -512,6 +528,7 @@ let orderBooks = {}; // marketKey -> {bids:[], asks:[]}
 let tradeTapes = {}; // marketKey -> [{time, price, volume, side, mine}], oldest -> newest
 let myOrders = [];
 let orderSide = 'buy';
+let orderType = 'limit'; // limit | market | stop | iceberg
 let orderSeq = 1;
 
 function marketsForPlatform(p){
@@ -576,7 +593,7 @@ function getTape(marketKey){
 }
 function usedLimitFor(pId){
   const p = participants.find(x=>x.id===pId);
-  const active = myOrders.filter(o=>o.status==='active'||o.status==='matched').reduce((s,o)=>s+o.volume,0);
+  const active = myOrders.filter(o=>o.status==='active'||o.status==='matched'||o.status==='waiting').reduce((s,o)=>s+o.volume,0);
   return p.used + active;
 }
 function freeLimitFor(pId){
@@ -715,9 +732,10 @@ function renderDashboard(){
   document.getElementById('dashPendingLink').onclick = ()=>showSection('trading');
   const recentOrders = myOrders.slice(0,4);
   document.getElementById('dashPending').innerHTML = recentOrders.length ? recentOrders.map(o=>{
-    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:['pill-neutral','Скасовано'];
+    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:o.status==='waiting'?['pill-warning','Очікує тригера']:['pill-neutral','Скасовано'];
+    const priceText = o.price!=null ? `${fmtMoney(o.price)} ${o.unit}` : (o.triggerPrice!=null ? `тригер ${fmtMoney(o.triggerPrice)} ${o.unit}` : '—');
     return `<div class="row-item" onclick="showSection('trading')">
-      <div class="row-main"><span class="strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${fmtMoney(o.price)} ${o.unit} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
+      <div class="row-main"><span class="strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${priceText} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
       <span class="pill ${st[0]}">${st[1]}</span>
     </div>`;
   }).join('') : `<p class="hint-text pad">Ви ще не виставляли заявок.</p>`;
@@ -876,18 +894,17 @@ function renderOrderBook(){
   const m = currentMarket();
   const book = getBook(m.key);
   document.getElementById('obHourLabel').textContent = m.label;
-  document.getElementById('fOrderPriceLbl').textContent = 'Ціна, ' + m.unit;
-  document.getElementById('fOrderVolLbl').textContent = 'Обсяг, ' + m.volUnit;
+  updateOrderFormLabels();
   const bestBid = book.bids[0] ? book.bids[0].price : null;
   const bestAsk = book.asks[0] ? book.asks[0].price : null;
   const clearing = (bestBid!=null && bestAsk!=null) ? (bestBid+bestAsk)/2 : null;
   document.getElementById('obClearing').textContent = clearing!=null ? 'Індикативна ціна: '+fmtMoney(clearing)+' '+m.unit : 'Немає зустрічних заявок';
 
   document.getElementById('obBids').innerHTML = book.bids.length ? book.bids.map(b=>`
-    <div class="ob-row ${b.mine?'ob-mine':''}"><span class="mono">${fmtMoney(b.price)}</span><span class="mono ob-vol">${fmtNum(b.volume)}</span>${b.mine?`<button class="ob-cancel" onclick="cancelOrder('${b.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
+    <div class="ob-row ${b.mine?'ob-mine':''}"><span class="mono">${fmtMoney(b.price)}${b.iceberg?' <span class="ob-ice" title="Айсберг — частина обсягу прихована">•</span>':''}</span><span class="mono ob-vol">${fmtNum(b.volume)}</span>${b.mine?`<button class="ob-cancel" onclick="cancelOrder('${b.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
     : `<p class="hint-text pad">Заявок на купівлю немає.</p>`;
   document.getElementById('obAsks').innerHTML = book.asks.length ? book.asks.map(a=>`
-    <div class="ob-row ${a.mine?'ob-mine':''}"><span class="mono">${fmtMoney(a.price)}</span><span class="mono ob-vol">${fmtNum(a.volume)}</span>${a.mine?`<button class="ob-cancel" onclick="cancelOrder('${a.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
+    <div class="ob-row ${a.mine?'ob-mine':''}"><span class="mono">${fmtMoney(a.price)}${a.iceberg?' <span class="ob-ice" title="Айсберг — частина обсягу прихована">•</span>':''}</span><span class="mono ob-vol">${fmtNum(a.volume)}</span>${a.mine?`<button class="ob-cancel" onclick="cancelOrder('${a.mine}')" title="Скасувати"><svg class="ic tiny"><use href="#i-close"/></svg></button>`:'<span></span>'}</div>`).join('')
     : `<p class="hint-text pad">Заявок на продаж немає.</p>`;
 
   const free = freeLimitFor(MY_COMPANY_ID);
@@ -900,13 +917,113 @@ function setOrderSide(side){
   document.getElementById('sideBuyBtn').classList.toggle('active', side==='buy');
   document.getElementById('sideSellBtn').classList.toggle('active', side==='sell');
 }
+function setOrderType(type){
+  orderType = type;
+  document.querySelectorAll('.otype-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===type));
+  document.getElementById('fOrderTriggerField').style.display = type==='stop' ? '' : 'none';
+  document.getElementById('fOrderVisibleField').style.display = type==='iceberg' ? '' : 'none';
+  document.getElementById('fOrderPriceField').style.display = type==='market' ? 'none' : '';
+  updateOrderFormLabels();
+}
+function updateOrderFormLabels(){
+  if(!currentPlatform) return;
+  const m = currentMarket();
+  document.getElementById('fOrderPriceLbl').textContent = (orderType==='stop' ? 'Ціна після спрацювання, необов’язково, ' : 'Ціна, ') + m.unit;
+  document.getElementById('fOrderVolLbl').textContent = (orderType==='iceberg' ? 'Загальний обсяг, ' : 'Обсяг, ') + m.volUnit;
+}
 function clearOrderVolError(){ document.getElementById('fOrderVolField').classList.remove('field-invalid'); }
+function recordTrade(marketKey, price, volume, side, mine){
+  getTape(marketKey).push({ time: simNow(), price, volume, side, mine });
+  checkStopOrders(marketKey, price);
+}
+function replenishIceberg(sideArray, removed, isBid){
+  if(!removed || !removed.iceberg || !(removed.hiddenRemaining>0)) return;
+  const nextSlice = Math.min(removed.sliceSize, removed.hiddenRemaining);
+  sideArray.push({ id:removed.id, price:removed.price, volume:nextSlice, mine:removed.mine, iceberg:true, sliceSize:removed.sliceSize, hiddenRemaining:removed.hiddenRemaining-nextSlice });
+  sideArray.sort(isBid ? (a,b)=>b.price-a.price : (a,b)=>a.price-b.price);
+}
+function checkStopOrders(marketKey, lastPrice){
+  const toTrigger = myOrders.filter(o=> o.status==='waiting' && o.type==='stop' && o.marketKey===marketKey &&
+    ((o.side==='buy' && lastPrice >= o.triggerPrice) || (o.side==='sell' && lastPrice <= o.triggerPrice)));
+  toTrigger.forEach(o=>{ o.status='active'; triggerStopOrder(o); });
+}
+function triggerStopOrder(o){
+  const plat = PLATFORMS.find(p=>p.id===o.platformId);
+  const m = marketsForPlatform(plat).find(x=>x.key===o.marketKey);
+  const book = getBook(o.marketKey);
+  if(o.price){
+    let matched = false;
+    if(o.side==='buy'){
+      if(book.asks.length && o.price >= book.asks[0].price){
+        matched = true;
+        book.asks[0].volume -= o.volume;
+        if(book.asks[0].volume<=0){ const removed=book.asks.shift(); replenishIceberg(book.asks, removed, false); }
+        recordTrade(o.marketKey, o.price, o.volume, 'buy', true);
+      } else {
+        book.bids.push({ id:o.id, price:o.price, volume:o.volume, mine:o.id });
+        book.bids.sort((a,b)=>b.price-a.price);
+      }
+    } else {
+      if(book.bids.length && o.price <= book.bids[0].price){
+        matched = true;
+        book.bids[0].volume -= o.volume;
+        if(book.bids[0].volume<=0){ const removed=book.bids.shift(); replenishIceberg(book.bids, removed, true); }
+        recordTrade(o.marketKey, o.price, o.volume, 'sell', true);
+      } else {
+        book.asks.push({ id:o.id, price:o.price, volume:o.volume, mine:o.id });
+        book.asks.sort((a,b)=>a.price-b.price);
+      }
+    }
+    o.status = matched ? 'matched' : 'active';
+    o.type = 'limit'; o.wasStop = true;
+  } else {
+    const opp = o.side==='buy' ? book.asks : book.bids;
+    if(!opp.length){
+      o.status='cancelled'; o.type='market'; o.wasStop=true;
+      toast(`Стоп спрацював (${m.label}), але ринкову заявку не вдалося виконати — немає ліквідності`);
+      renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
+      return;
+    }
+    const execPrice = opp[0].price;
+    const filled = Math.min(opp[0].volume, o.volume);
+    opp[0].volume -= filled;
+    if(opp[0].volume<=0){ const removed=opp.shift(); replenishIceberg(opp, removed, o.side==='buy'); }
+    recordTrade(o.marketKey, execPrice, filled, o.side, true);
+    o.price = execPrice; o.volume = filled; o.status='matched'; o.type='market'; o.wasStop=true;
+  }
+  toast(`Стоп-заявка спрацювала: ${m.label} · ${o.side==='buy'?'купівля':'продаж'}`);
+  renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
+}
+function executeMarketOrder(m, side, volume, id){
+  const book = getBook(m.key);
+  const opp = side==='buy' ? book.asks : book.bids;
+  if(!opp.length){
+    myOrders.unshift({ id, platformId:currentPlatform.id, marketKey:m.key, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side, price:null, volume, status:'cancelled', type:'market' });
+    toast('Ринкова заявка не виконана — немає зустрічних заявок');
+    return;
+  }
+  const execPrice = opp[0].price;
+  const filled = Math.min(opp[0].volume, volume);
+  opp[0].volume -= filled;
+  if(opp[0].volume<=0){ const removed=opp.shift(); replenishIceberg(opp, removed, side==='buy'); }
+  recordTrade(m.key, execPrice, filled, side, true);
+  const partial = filled < volume;
+  myOrders.unshift({ id, platformId:currentPlatform.id, marketKey:m.key, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side, price:execPrice, volume:filled, status:'matched', type:'market', partial });
+  toast(partial
+    ? `Ринкову заявку виконано частково: ${fmtNum(filled)} з ${fmtNum(volume)} ${m.volUnit} за ${fmtMoney(execPrice)} ${m.unit} — залишок скасовано (немає ліквідності)`
+    : `Ринкову заявку виконано за ${fmtMoney(execPrice)} ${m.unit}`);
+}
 function submitOrder(){
   const m = currentMarket();
   const priceInput = document.getElementById('fOrderPrice');
   const volInput = document.getElementById('fOrderVolume');
+  const triggerInput = document.getElementById('fOrderTrigger');
+  const visibleInput = document.getElementById('fOrderVisible');
   const price = parseFloat(priceInput.value);
   const volume = parseFloat(volInput.value);
+  const trigger = parseFloat(triggerInput.value);
+  const visible = parseFloat(visibleInput.value);
+
   if(!volume || volume<=0){ document.getElementById('fOrderVolField').classList.add('field-invalid'); document.getElementById('fOrderVolError').textContent = 'Вкажіть обсяг заявки в ' + m.volUnit + '.'; return; }
   const free = freeLimitFor(MY_COMPANY_ID);
   if(volume > free){
@@ -914,63 +1031,91 @@ function submitOrder(){
     document.getElementById('fOrderVolError').textContent = `Обсяг перевищує вільний ліміт учасника (доступно ${fmtNum(free)} ${m.volUnit}) — зменшіть обсяг або скасуйте активну заявку.`;
     return;
   }
-  if(!price || price<=0){ toast('Вкажіть ціну заявки'); return; }
+  if(orderType==='limit' && (!price || price<=0)){ toast('Вкажіть ціну заявки'); return; }
+  if(orderType==='stop' && (!trigger || trigger<=0)){ toast('Вкажіть стоп-ціну'); return; }
+  if(orderType==='iceberg'){
+    if(!price || price<=0){ toast('Вкажіть ціну заявки'); return; }
+    if(!visible || visible<=0 || visible>=volume){ toast('Видимий обсяг має бути більшим за 0 і меншим за загальний обсяг'); return; }
+  }
   clearOrderVolError();
+  const id = 'o'+(orderSeq++);
+
+  if(orderType==='stop'){
+    myOrders.unshift({ id, platformId:currentPlatform.id, marketKey:m.key, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price:(price||null), triggerPrice:trigger, volume, status:'waiting', type:'stop' });
+    priceInput.value=''; volInput.value=''; triggerInput.value='';
+    toast(`Стоп-заявку встановлено на ${fmtMoney(trigger)} ${m.unit}`);
+    renderMyOrders();
+    return;
+  }
+
+  if(orderType==='market'){
+    executeMarketOrder(m, orderSide, volume, id);
+    volInput.value='';
+    renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
+    return;
+  }
 
   const book = getBook(m.key);
-  const id = 'o'+(orderSeq++);
+  const visibleSize = orderType==='iceberg' ? visible : volume;
+  const hiddenRemaining = orderType==='iceberg' ? (volume - visible) : 0;
   let status = 'active';
   if(orderSide==='buy'){
     if(book.asks.length && price >= book.asks[0].price){
       status = 'matched';
       book.asks[0].volume -= volume;
-      if(book.asks[0].volume<=0) book.asks.shift();
+      if(book.asks[0].volume<=0){ const removed=book.asks.shift(); replenishIceberg(book.asks, removed, false); }
+      recordTrade(m.key, price, volume, 'buy', true);
     } else {
-      book.bids.push({ id:'seed', price, volume, mine:id });
+      book.bids.push({ id:'seed', price, volume:visibleSize, mine:id, iceberg: orderType==='iceberg', sliceSize:visibleSize, hiddenRemaining });
       book.bids.sort((a,b)=>b.price-a.price);
     }
   } else {
     if(book.bids.length && price <= book.bids[0].price){
       status = 'matched';
       book.bids[0].volume -= volume;
-      if(book.bids[0].volume<=0) book.bids.shift();
+      if(book.bids[0].volume<=0){ const removed=book.bids.shift(); replenishIceberg(book.bids, removed, true); }
+      recordTrade(m.key, price, volume, 'sell', true);
     } else {
-      book.asks.push({ id:'seed', price, volume, mine:id });
+      book.asks.push({ id:'seed', price, volume:visibleSize, mine:id, iceberg: orderType==='iceberg', sliceSize:visibleSize, hiddenRemaining });
       book.asks.sort((a,b)=>a.price-b.price);
     }
   }
-  myOrders.unshift({ id, platformId:currentPlatform.id, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price, volume, status });
-  if(status==='matched'){
-    getTape(m.key).push({ time: simNow(), price, volume, side:orderSide, mine:true });
-  }
-  priceInput.value=''; volInput.value='';
-  toast(status==='matched' ? `Заявку виконано за ціною ${fmtMoney(price)} ${m.unit}` : 'Заявку прийнято до стакану');
+  myOrders.unshift({ id, platformId:currentPlatform.id, marketKey:m.key, marketLabel:m.label, unit:m.unit, volUnit:m.volUnit, side:orderSide, price, volume, status, type:orderType });
+  priceInput.value=''; volInput.value=''; visibleInput.value='';
+  toast(status==='matched' ? `Заявку виконано за ціною ${fmtMoney(price)} ${m.unit}` : (orderType==='iceberg' ? 'Айсберг-заявку прийнято до стакану (частково видима)' : 'Заявку прийнято до стакану'));
   renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
 }
 function cancelOrder(id){
   const o = myOrders.find(x=>x.id===id);
-  if(!o || o.status!=='active'){ toast('Виконану заявку скасувати не можна'); return; }
+  if(!o || (o.status!=='active' && o.status!=='waiting')){ toast('Цю заявку скасувати не можна'); return; }
+  if(o.status==='waiting'){
+    o.status = 'cancelled';
+    toast('Стоп-заявку скасовано');
+    renderMyOrders();
+    return;
+  }
   const wasOnOtherPlatform = o.platformId !== currentPlatform.id;
-  const markets = marketsForPlatform(PLATFORMS.find(p=>p.id===o.platformId));
-  const key = markets.find(m=>m.label===o.marketLabel)?.key;
-  if(key && orderBooks[key]){
-    orderBooks[key].bids = orderBooks[key].bids.filter(b=>b.mine!==id);
-    orderBooks[key].asks = orderBooks[key].asks.filter(a=>a.mine!==id);
+  if(o.marketKey && orderBooks[o.marketKey]){
+    orderBooks[o.marketKey].bids = orderBooks[o.marketKey].bids.filter(b=>b.mine!==id);
+    orderBooks[o.marketKey].asks = orderBooks[o.marketKey].asks.filter(a=>a.mine!==id);
   }
   o.status = 'cancelled';
   toast('Заявку скасовано' + (wasOnOtherPlatform ? ' (' + o.marketLabel + ')' : ''));
-  renderOrderBook(); renderMyOrders();
+  renderOrderBook(); renderMyOrders(); renderTradeTape(); renderTradingChart();
 }
 function renderMyOrders(){
   const box = document.getElementById('myOrdersList');
   if(!myOrders.length){ box.innerHTML = `<p class="hint-text pad">Заявок ще немає.</p>`; return; }
+  const typeLabels = { limit:'Лімітна', market:'Ринкова', stop:'Стоп', iceberg:'Айсберг' };
   box.innerHTML = myOrders.map(o=>{
-    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:['pill-neutral','Скасовано'];
+    const st = o.status==='active'?['pill-info','Активна']:o.status==='matched'?['pill-success','Виконано']:o.status==='waiting'?['pill-warning','Очікує тригера']:['pill-neutral','Скасовано'];
     const plat = PLATFORMS.find(p=>p.id===o.platformId);
     const platLabel = plat ? plat.badge : '';
+    const typeLabel = typeLabels[o.type] || 'Лімітна';
+    const priceText = (o.type==='stop' && o.status==='waiting') ? `тригер ${fmtMoney(o.triggerPrice)} ${o.unit}` : (o.price!=null ? `${fmtMoney(o.price)} ${o.unit}` : '—');
     return `<div class="row-item">
-      <div class="row-main"><span class="mono strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${platLabel} · ${fmtMoney(o.price)} ${o.unit} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
-      <div class="row-side"><span class="pill ${st[0]}">${st[1]}</span>${o.status==='active'?`<button class="icon-btn" onclick="cancelOrder('${o.id}')" aria-label="Скасувати"><svg class="ic sm"><use href="#i-close"/></svg></button>`:''}</div>
+      <div class="row-main"><span class="mono strong">${escapeHtml(o.marketLabel)} · ${o.side==='buy'?'Купівля':'Продаж'}</span><span class="row-sub mono">${platLabel} · ${typeLabel}${o.wasStop?' зі стопа':''} · ${priceText} · ${fmtNum(o.volume)} ${o.volUnit}</span></div>
+      <div class="row-side"><span class="pill ${st[0]}">${st[1]}</span>${(o.status==='active'||o.status==='waiting')?`<button class="icon-btn" onclick="cancelOrder('${o.id}')" aria-label="Скасувати"><svg class="ic sm"><use href="#i-close"/></svg></button>`:''}</div>
     </div>`;
   }).join('');
 }
@@ -1783,6 +1928,12 @@ body{
 .side-btn{ flex:1; padding:9px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--card-2); color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:13px; }
 .side-btn.side-buy.active{ background:var(--success-bg); border-color:var(--buy); color:var(--buy); }
 .side-btn.side-sell.active{ background:var(--critical-bg); border-color:var(--sell); color:var(--sell); }
+
+.otype-toggle{ display:flex; gap:4px; margin-bottom:12px; background:var(--card-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; }
+.otype-btn{ flex:1; padding:7px 4px; border-radius:calc(var(--radius-sm) - 2px); border:none; background:transparent; color:var(--text-2); cursor:pointer; font-weight:600; font-family:inherit; font-size:11.5px; }
+.otype-btn:hover{ color:var(--text); }
+.otype-btn.active{ background:var(--accent); color:var(--accent-text-on); }
+.ob-ice{ color:var(--accent); font-weight:700; cursor:help; }
 
 /* ---- quotations ---- */
 .quote-card{ margin-bottom:14px; }
