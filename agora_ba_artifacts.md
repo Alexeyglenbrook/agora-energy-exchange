@@ -2,7 +2,7 @@
 
 Комплект аналітичних артефактів для процесу акредитації учасників торгової платформи «Агора»: ролі, права доступу, статуси заявки та переходи між ними.
 
-Пов'язаний інтерактивний прототип: [`agora_energy_exchange_prototype.html`](agora_energy_exchange_prototype.html).
+Пов'язаний інтерактивний прототип: [відкрити «Агору»](https://alexeyglenbrook.github.io/agora-energy-exchange/agora_energy_exchange_prototype.html).
 
 ## Зміст
 
