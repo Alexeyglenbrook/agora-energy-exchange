@@ -11,9 +11,11 @@
       </bpmn:lane>
       <bpmn:lane id="Lane_AML2" name="Фінансовий моніторинг">
         <bpmn:flowNodeRef>Task_CheckAML2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_AmlOk</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Legal2" name="Юридичний відділ">
         <bpmn:flowNodeRef>Task_CheckLegal2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_LegalOk</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_System" name="Система «Агора»">
         <bpmn:flowNodeRef>Task_AutoCheck</bpmn:flowNodeRef>
@@ -37,6 +39,7 @@
     <bpmn:task id="Task_SubmitApp" name="Подати заявку (статус: Подано)">
       <bpmn:incoming>SF1</bpmn:incoming>
       <bpmn:incoming>SF4</bpmn:incoming>
+      <bpmn:incoming>SF8_no</bpmn:incoming>
       <bpmn:outgoing>SF2</bpmn:outgoing>
     </bpmn:task>
     <bpmn:task id="Task_AutoCheck" name="Автоперевірка комплектності">
@@ -57,13 +60,23 @@
       <bpmn:incoming>SF6</bpmn:incoming>
       <bpmn:outgoing>SF8</bpmn:outgoing>
     </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_LegalOk" name="Документи коректні?">
+      <bpmn:incoming>SF8</bpmn:incoming>
+      <bpmn:outgoing>SF8_ok</bpmn:outgoing>
+      <bpmn:outgoing>SF8_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
     <bpmn:task id="Task_CheckAML2" name="AML-перевірка у кабінеті">
       <bpmn:incoming>SF7</bpmn:incoming>
       <bpmn:outgoing>SF9</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:parallelGateway id="ParallelGateway_Join">
-      <bpmn:incoming>SF8</bpmn:incoming>
+    <bpmn:exclusiveGateway id="Gateway_AmlOk" name="Підстав для відмови немає?">
       <bpmn:incoming>SF9</bpmn:incoming>
+      <bpmn:outgoing>SF9_ok</bpmn:outgoing>
+      <bpmn:outgoing>SF9_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway_Join">
+      <bpmn:incoming>SF8_ok</bpmn:incoming>
+      <bpmn:incoming>SF9_ok</bpmn:incoming>
       <bpmn:outgoing>Flow_1ucate9</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:exclusiveGateway id="Gateway_CommitteeDecision2" name="Рішення комітету">
@@ -73,6 +86,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:endEvent id="EndEvent_Rejected2" name="Відмова (статус: Відхилено)">
       <bpmn:incoming>SF11</bpmn:incoming>
+      <bpmn:incoming>SF9_no</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:task id="Task_SignKep" name="Підписати електронно (КЕП)">
       <bpmn:incoming>Flow_1f7g63m</bpmn:incoming>
@@ -100,8 +114,12 @@
     <bpmn:sequenceFlow id="SF5" name="так" sourceRef="Gateway_PackageOk" targetRef="ParallelGateway_Split" />
     <bpmn:sequenceFlow id="SF6" sourceRef="ParallelGateway_Split" targetRef="Task_CheckLegal2" />
     <bpmn:sequenceFlow id="SF7" sourceRef="ParallelGateway_Split" targetRef="Task_CheckAML2" />
-    <bpmn:sequenceFlow id="SF8" sourceRef="Task_CheckLegal2" targetRef="ParallelGateway_Join" />
-    <bpmn:sequenceFlow id="SF9" sourceRef="Task_CheckAML2" targetRef="ParallelGateway_Join" />
+    <bpmn:sequenceFlow id="SF8" sourceRef="Task_CheckLegal2" targetRef="Gateway_LegalOk" />
+    <bpmn:sequenceFlow id="SF8_ok" name="так" sourceRef="Gateway_LegalOk" targetRef="ParallelGateway_Join" />
+    <bpmn:sequenceFlow id="SF8_no" name="ні — юридичні зауваження, відділ акредитації оформляє повернення" sourceRef="Gateway_LegalOk" targetRef="Task_SubmitApp" />
+    <bpmn:sequenceFlow id="SF9" sourceRef="Task_CheckAML2" targetRef="Gateway_AmlOk" />
+    <bpmn:sequenceFlow id="SF9_ok" name="так" sourceRef="Gateway_AmlOk" targetRef="ParallelGateway_Join" />
+    <bpmn:sequenceFlow id="SF9_no" name="ні — санкції, минаючи комітет (BR-03)" sourceRef="Gateway_AmlOk" targetRef="EndEvent_Rejected2" />
     <bpmn:sequenceFlow id="Flow_1ucate9" sourceRef="ParallelGateway_Join" targetRef="Gateway_CommitteeDecision2" />
     <bpmn:sequenceFlow id="SF11" name="відхилено" sourceRef="Gateway_CommitteeDecision2" targetRef="EndEvent_Rejected2" />
     <bpmn:sequenceFlow id="SF12" name="затверджено" sourceRef="Gateway_CommitteeDecision2" targetRef="Task_GenerateDocs" />
@@ -157,8 +175,20 @@
       <bpmndi:BPMNShape id="Task_CheckLegal2_di" bpmnElement="Task_CheckLegal2">
         <dc:Bounds x="1060" y="385" width="140" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_LegalOk_di" bpmnElement="Gateway_LegalOk" isMarkerVisible="true">
+        <dc:Bounds x="1230" y="405" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1211" y="462" width="88" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_CheckAML2_di" bpmnElement="Task_CheckAML2">
         <dc:Bounds x="1060" y="495" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_AmlOk_di" bpmnElement="Gateway_AmlOk" isMarkerVisible="true">
+        <dc:Bounds x="1230" y="515" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1211" y="572" width="88" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ParallelGateway_Join_di" bpmnElement="ParallelGateway_Join">
         <dc:Bounds x="1320" y="255" width="50" height="50" />
@@ -233,13 +263,43 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SF8_di" bpmnElement="SF8">
         <di:waypoint x="1200" y="425" />
-        <di:waypoint x="1320" y="425" />
-        <di:waypoint x="1320" y="280" />
+        <di:waypoint x="1230" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF8_ok_di" bpmnElement="SF8_ok">
+        <di:waypoint x="1280" y="430" />
+        <di:waypoint x="1330" y="430" />
+        <di:waypoint x="1330" y="305" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1336" y="380" width="16" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF8_no_di" bpmnElement="SF8_no">
+        <di:waypoint x="1255" y="405" />
+        <di:waypoint x="1255" y="135" />
+        <di:waypoint x="540" y="135" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="900" y="113" width="180" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SF9_di" bpmnElement="SF9">
         <di:waypoint x="1200" y="535" />
-        <di:waypoint x="1345" y="535" />
-        <di:waypoint x="1345" y="305" />
+        <di:waypoint x="1230" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF9_ok_di" bpmnElement="SF9_ok">
+        <di:waypoint x="1280" y="540" />
+        <di:waypoint x="1360" y="540" />
+        <di:waypoint x="1360" y="305" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1366" y="450" width="16" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF9_no_di" bpmnElement="SF9_no">
+        <di:waypoint x="1255" y="565" />
+        <di:waypoint x="1255" y="665" />
+        <di:waypoint x="1670" y="665" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1300" y="600" width="180" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SF11_di" bpmnElement="SF11">
         <di:waypoint x="1570" y="665" />
