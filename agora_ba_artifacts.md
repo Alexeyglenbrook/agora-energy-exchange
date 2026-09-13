@@ -21,7 +21,7 @@
 - [3. Матриця доступів](#3-матриця-доступів)
 - [4. Статуси заявки та переходи](#4-статуси-заявки-та-переходи)
 - [5. Діаграма станів заявки (UML State Diagram)](#5-діаграма-станів-заявки-uml-state-diagram)
-- [6. Процес акредитації AS-IS та TO-BE](#6-процес-акредитації-as-is-та-to-be)
+- [6. Процес акредитації AS-IS,TO-BE та GAP-аналіз](#6-процес-акредитації-as-is-та-to-be)
 - [7. Декомпозиція: Epic → Features → User Stories](#7-декомпозиція-epic--features--user-stories)
 - [8. User stories та acceptance criteria](#8-user-stories-та-acceptance-criteria)
 - [9. UAT-чекліст](#9-uat-чекліст)
