@@ -8,7 +8,7 @@
 
 # Agora Energy Exchange — Business Requirements & Solution Specification (BRD / SRS)
 
-## 1. Business Context & High-Level Objectives (BRD Overview)
+## Business Context & High-Level Objectives (BRD Overview)
 * **Problem Statement:** Поточні процеси торгівлі енергоносіями потребують автоматизації акредитації, матчингу заявок, перевірки фінансових лімітів та інтеграції з TSO/DSO для зниження операційних ризиків.
 * **Project Goal:** Створення високонавантаженої платформи (Agora Energy Exchange) для автоматизації акредитації учасників, біржових торгів та клірингу.
 * **Scope:**
